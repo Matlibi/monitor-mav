@@ -15182,7 +15182,7 @@ const CHARTS = {};
 const GITHUB_USER = 'Matilibi';
 const GITHUB_REPO = 'monitor-mav';
 const GITHUB_BRANCH = 'main';
-const DATA_FOLDER = 'datos';
+const DATOS_FOLDER = 'datos';
 
 // ── CARGA AUTOMÁTICA DESDE GITHUB ────────────────────────────────────────
 async function cargarDesdeGitHub() {
@@ -15197,7 +15197,7 @@ async function cargarDesdeGitHub() {
 
   try {
     // Listar archivos en la carpeta data/ via GitHub API
-    const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FOLDER}?ref=${GITHUB_BRANCH}`;
+    const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATOS_FOLDER}?ref=${GITHUB_BRANCH}`;
     const res = await fetch(apiUrl);
     if (!res.ok) {
       loadingMsg.textContent = '⚠️ No se encontró la carpeta data/ en GitHub.';
@@ -15215,7 +15215,7 @@ async function cargarDesdeGitHub() {
 
     // Descargar todos los CSV en paralelo
     const resultados = await Promise.all(csvs.map(async f => {
-      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${DATA_FOLDER}/${f.name}`;
+      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${DATOS_FOLDER}/${f.name}`;
       const r = await fetch(rawUrl);
       const buffer = await r.arrayBuffer();
       // Decodificar ISO-8859-1
