@@ -209,7 +209,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="pbadge" id="periodLabel">01/04/2026 — 29/04/2026</div>
-    <div id="loadingMsg" class="loading-msg">⏳ Cargando data…</div>
+    <div id="loadingMsg" class="loading-msg">⏳ Cargando datos…</div>
     <button class="dl-btn" onclick="descargarDashboard()" title="Descargar dashboard como HTML">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 9l3.5 3L10 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M1 10h11v2H1z" fill="currentColor" opacity=".4"></path></svg>
       Descargar
@@ -15179,7 +15179,7 @@ let DB = [...RAW];
 const CHARTS = {};
 
 // ── CONFIG GITHUB ─────────────────────────────────────────────────────────
-const GITHUB_USER = 'Matilibi';
+const GITHUB_USER = 'Matlibi';
 const GITHUB_REPO = 'monitor-mav';
 const GITHUB_BRANCH = 'main';
 const DATA_FOLDER = 'data';
@@ -15187,7 +15187,7 @@ const DATA_FOLDER = 'data';
 // ── CARGA AUTOMÁTICA DESDE GITHUB ────────────────────────────────────────
 async function cargarDesdeGitHub() {
   const loadingMsg = document.getElementById('loadingMsg');
-  loadingMsg.textContent = '⏳ Cargando data desde la nube…';
+  loadingMsg.textContent = '⏳ Cargando datos desde la nube…';
   loadingMsg.classList.remove('hidden');
 
   const SEG_MAP = {
@@ -15255,7 +15255,7 @@ async function cargarDesdeGitHub() {
       });
     });
 
-    // Merge con RAW (data embebidos) y data de GitHub, deduplicando por fecha
+    // Merge con RAW (datos embebidos) y datos de GitHub, deduplicando por fecha
     const fechasNuevas = new Set(nuevos.map(r => r.fecha));
     DB = DB.filter(r => !fechasNuevas.has(r.fecha));
     DB = [...DB, ...nuevos];
@@ -15575,7 +15575,7 @@ function syncEvoFecha(){
 
 function updatePeriodLabel(){
   const fechas=[...new Set(DB.map(r=>r.fecha))].sort();
-  const lbl = fechas.length>1 ? fechas[0]+' — '+fechas[fechas.length-1] : 'data al '+fechas[0];
+  const lbl = fechas.length>1 ? fechas[0]+' — '+fechas[fechas.length-1] : 'Datos al '+fechas[0];
   document.getElementById('periodLabel').textContent = lbl;
 }
 function getFiltered(){
@@ -15600,7 +15600,7 @@ function getEvoBase(){
   });
 }
 
-// data de evolución: aplica filtros propios de evolución sobre getEvoBase()
+// Datos de evolución: aplica filtros propios de evolución sobre getEvoBase()
 function getEvoData(){
   let base = getEvoBase();
   if(EVO_FECHA!=='all')   base = base.filter(r=>r.fecha===EVO_FECHA);
@@ -15734,7 +15734,7 @@ function renderKPIs(data){
 }
 
 function renderResumen(data){
-  // Segmentos presentes en los data filtrados (no mostrar vacíos)
+  // Segmentos presentes en los datos filtrados (no mostrar vacíos)
   const segsActivos = SEGS.filter(s=>data.some(r=>r.segmento===s));
   const segsLabels  = segsActivos.length ? segsActivos : SEGS;
 
@@ -15811,7 +15811,7 @@ function renderResumen(data){
   ];
   const instrs=['ECHEQ','PAGARE','FCE','CPD','PAGARE AJUSTE TAMAR'];
   const iclrs=['#2060A0BB','#5BB8D4BB','#1C3557BB','#4A90D9BB','#A0A0A0BB'];
-  // Solo mostrar instrumentos que tengan data
+  // Solo mostrar instrumentos que tengan datos
   const instrsActivos = instrs.filter(ins=>data.some(r=>r.instrumento===ins&&r.plazo!=null));
 
   mkChart('cInstr','bar',{
