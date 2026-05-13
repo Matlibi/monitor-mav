@@ -15667,7 +15667,7 @@ function setSeg(seg,btn){
   S.seg=seg;
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
   btn.classList.add(seg==='all'?'a-all':seg==='No Garantizado'?'a-ng':seg==='Garantizado'?'a-gar':'a-av');
-  const showPyme=seg=='Garantizado'||seg==='No Garantizado';
+  const showPyme=seg==='Garantizado'||seg==='No Garantizado';
   ['pymeSI','pymeNO'].forEach(id=>document.getElementById(id).style.display=showPyme?'':'none');
   if(!showPyme){S.pyme=null;['pymeSI','pymeNO'].forEach(id=>document.getElementById(id).classList.remove('active'));}
   buildRespList(seg);
