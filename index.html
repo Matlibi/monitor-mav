@@ -232,8 +232,8 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
     <div class="vsep"></div>
 
-    <button class="ptog active" id="pymeSI" onclick="togglePyme('SI')" style=""><span class="pdot"></span>PyME</button>
-    <button class="ptog" id="pymeNO" onclick="togglePyme('NO')" style="">No PyME</button>
+    <button class="ptog active" id="pymeSI" onclick="togglePyme('SI')" style="display:none"><span class="pdot"></span>PyME</button>
+    <button class="ptog" id="pymeNO" onclick="togglePyme('NO')" style="display:none">No PyME</button>
 
     <!-- Vista toggle empujado a la derecha -->
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
@@ -15667,7 +15667,7 @@ function setSeg(seg,btn){
   S.seg=seg;
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
   btn.classList.add(seg==='all'?'a-all':seg==='No Garantizado'?'a-ng':seg==='Garantizado'?'a-gar':'a-av');
-  const showPyme=seg!=='Avalado';
+  const showPyme=seg!=='Garantizado'||seg==='No Garantizado';
   ['pymeSI','pymeNO'].forEach(id=>document.getElementById(id).style.display=showPyme?'':'none');
   if(!showPyme){S.pyme=null;['pymeSI','pymeNO'].forEach(id=>document.getElementById(id).classList.remove('active'));}
   buildRespList(seg);
@@ -15685,7 +15685,7 @@ function resetFilters(){
   EVO_FECHA='all'; EVO_PERIODO='all'; EVO_INSTR='all'; EVO_MONEDA='all';
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
   document.querySelector('#segBtns .tbtn').classList.add('a-all');
-  ['pymeSI','pymeNO'].forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).style.display='';});
+  ['pymeSI','pymeNO'].forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).style.display='none';});
   document.getElementById('instrFilter').value='all';
   document.getElementById('monedaFilter').value='all';
   document.getElementById('fechaFilter').value='all';
