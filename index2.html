@@ -15526,7 +15526,7 @@ function parseFecha(f){ const [d,m,y]=f.split('/'); return new Date(+y,+m-1,+d);
 
 let ALL_FECHAS=[];
 function rebuildFechaSelect(){
-  ALL_FECHAS=[...new Set(DB.map(r=>r.fecha))].sort((a,b)=>parseFecha(a)-parseFecha(b));
+  ALL_FECHAS=[...new Set(DB.map(r=>r.fecha))].sort((a,b)=>parseFecha(b)-parseFecha(a));
   S.fechas=new Set([...S.fechas].filter(f=>ALL_FECHAS.includes(f)));
   renderMsList('fechaList',ALL_FECHAS,S.fechas,toggleFecha,'');
   updateFechaTrigger();
