@@ -15759,7 +15759,10 @@ function applyFilters(){
   const data=getFiltered();
   document.getElementById('resBadge').textContent=data.length+' ops';
   renderKPIs(data);
-  if(S.view==='resumen'){renderResumen(data);renderTable(data);}
+  if(S.view==='resumen'){
+    renderResumen(data);
+    renderTable([...data].sort((a,b)=>parseFecha(b.fecha)-parseFecha(a.fecha)));
+  }
   else renderEvolucion(getEvoData());
 }
 
