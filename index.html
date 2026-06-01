@@ -15177,6 +15177,20 @@ let EVO_INSTR = 'all';
 let EVO_MONEDA = 'all';
 let DB = [...RAW];
 const CHARTS = {};
+function _debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+function _updateEvoVolChart(data){
+  const opts={responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+      tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
+      y:{grid:{color:'#F0F2F5'},title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
+        ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}
+    }
+  };
+  if(CHARTS['cEvoVol']){CHARTS['cEvoVol'].data=data;CHARTS['cEvoVol'].options=opts;CHARTS['cEvoVol'].update('none');}
+  else{CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),{type:'line',data,options:opts});}
+}
 
 // ── CONFIG GITHUB ─────────────────────────────────────────────────────────
 const GITHUB_USER = 'Matlibi';
@@ -15311,10 +15325,15 @@ const SEG_PILL={'No Garantizado':'ng','Garantizado':'gar','Avalado':'av'};
 const SEGS=['No Garantizado','Garantizado','Avalado'];
 
 function mkChart(id,type,data,opts){
-  if(CHARTS[id])CHARTS[id].destroy();
-  CHARTS[id]=new Chart(document.getElementById(id).getContext('2d'),
-    {type,data,options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{}},...opts}});
+  const fullOpts={responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{display:false},tooltip:{}},...opts};
+  if(CHARTS[id]){
+    CHARTS[id].data=data;
+    CHARTS[id].options=fullOpts;
+    CHARTS[id].update('none');
+    return;
+  }
+  CHARTS[id]=new Chart(document.getElementById(id).getContext('2d'),{type,data,options:fullOpts});
 }
 const getHora=r=>{if(!r.hora||r.hora==='—')return null;const m=r.hora.match(/^(\d{2})/);return m?m[1]+':00':null};
 
@@ -15392,10 +15411,10 @@ function renderMsList(listId, pool, selected, toggleFn, searchVal){
       <span>${r}</span>
     </label>`).join('');
 }
-function filterMsList(){
+const filterMsList=_debounce(()=>{
   const q=document.getElementById('respSearch').value;
   renderMsList('respList',ALL_RESPS,S.resps,toggleResp,q);
-}
+},150);
 function toggleResp(val){
   S.resps.has(val)?S.resps.delete(val):S.resps.add(val);
   updateRespTrigger();
@@ -15622,10 +15641,10 @@ function buildBenList(){
   ALL_BENS=[...new Set(DB.filter(r=>r.ben&&r.ben!=='—').map(r=>r.ben))].sort();
   renderMsList('benList',ALL_BENS,S.bens,toggleBen,'');
 }
-function filterBenList(){
+const filterBenList=_debounce(()=>{
   const q=document.getElementById('benSearch').value;
   renderMsList('benList',ALL_BENS,S.bens,toggleBen,q);
-}
+},150);
 function toggleBen(val){
   S.bens.has(val)?S.bens.delete(val):S.bens.add(val);
   updateBenTrigger(); applyFilters();
@@ -15716,6 +15735,7 @@ function setView(v){
 // ── RENDER ────────────────────────────────────────────────────────────────
 function applyFilters(){
   const data=getFiltered();
+  _tableShowAll=false;
   document.getElementById('resBadge').textContent=data.length+' ops';
   renderKPIs(data);
   if(S.view==='resumen'){renderResumen(data);renderTable(data);}
@@ -15723,16 +15743,19 @@ function applyFilters(){
 }
 
 function renderKPIs(data){
-  const ars=data.filter(r=>r.moneda==='$');
-  document.getElementById('kVol').textContent=fmtM(sumArr(ars.map(r=>r.monto||0)));
+  let volArs=0,tasaSum=0,tasaCnt=0,plazoSum=0,plazoCnt=0,pymeCnt=0;
+  for(const r of data){
+    if(r.moneda==='$') volArs+=r.monto||0;
+    if(r.tasa!=null){tasaSum+=r.tasa;tasaCnt++;}
+    if(r.plazo!=null){plazoSum+=r.plazo;plazoCnt++;}
+    if(r.pyme==='SI') pymeCnt++;
+  }
+  document.getElementById('kVol').textContent=fmtM(volArs);
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kInst').textContent=data.length.toLocaleString('es-AR');
-  const t=data.filter(r=>r.tasa!=null).map(r=>r.tasa);
-  document.getElementById('kTasa').textContent=t.length?avg(t).toFixed(1)+'%':'—';
-  const p=data.filter(r=>r.plazo!=null).map(r=>r.plazo);
-  document.getElementById('kPlazo').textContent=p.length?Math.round(avg(p))+'d':'—';
-  const np=data.filter(r=>r.pyme==='SI').length;
-  document.getElementById('kPyme').textContent=data.length?Math.round(np/data.length*100)+'%':'—';
+  document.getElementById('kTasa').textContent=tasaCnt?(tasaSum/tasaCnt).toFixed(1)+'%':'—';
+  document.getElementById('kPlazo').textContent=plazoCnt?Math.round(plazoSum/plazoCnt)+'d':'—';
+  document.getElementById('kPyme').textContent=data.length?Math.round(pymeCnt/data.length*100)+'%':'—';
 }
 
 function renderResumen(data){
@@ -15768,41 +15791,25 @@ function renderResumen(data){
     };
   }).filter(Boolean);
 
-  if(CHARTS['cTasas'])CHARTS['cTasas'].destroy();
-  CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),{
-    type:'bubble',
-    data:{
-      datasets: tasasData.map(d=>({
-        label: d.seg,
-        data:[{ x: d.plazo, y: d.tasa, r: 6 }],
-        backgroundColor: SEG_C[d.seg]+'88',
-        borderColor:     SEG_C[d.seg]+'BB',
-        borderWidth: 1,
-      }))
+  const cTasasData={datasets:tasasData.map(d=>({
+    label:d.seg,
+    data:[{x:d.plazo,y:d.tasa,r:6}],
+    backgroundColor:SEG_C[d.seg]+'88',
+    borderColor:SEG_C[d.seg]+'BB',
+    borderWidth:1,
+  }))};
+  const cTasasOpts={responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{
+      legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+      tooltip:{callbacks:{label:ctx=>{const d=ctx.dataset.label;return ` ${d} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`;}}}
     },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-        tooltip:{callbacks:{
-          label: ctx=>{
-            const d=ctx.dataset.label;
-            return ` ${d} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`;
-          }
-        }}
-      },
-      scales:{
-        x:{
-          title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},
-          grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}
-        },
-        y:{
-          title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},
-          grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}
-        }
-      }
+    scales:{
+      x:{title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}},
+      y:{title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}}
     }
-  });
+  };
+  if(CHARTS['cTasas']){CHARTS['cTasas'].data=cTasasData;CHARTS['cTasas'].options=cTasasOpts;CHARTS['cTasas'].update('none');}
+  else{CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),{type:'bubble',data:cTasasData,options:cTasasOpts});}
 
   // ── Gráfico 3: Volumen por rango de plazo ──
   const RANGOS = [
@@ -15836,15 +15843,18 @@ function renderResumen(data){
   });
 }
 
+const TABLE_PAGE=300;
+let _tableShowAll=false;
 function renderTable(data){
   const tb=document.getElementById('tableBody');
   const em=document.getElementById('emptyMsg');
-  if(!data.length){tb.innerHTML='';em.style.display='';return;}
+  if(!data.length){tb.innerHTML='';em.style.display='';_tableShowAll=false;return;}
   em.style.display='none';
-  tb.innerHTML=data.map(r=>{
+  const rows=_tableShowAll?data:data.slice(0,TABLE_PAGE);
+  const mkRow=r=>{
     const p=SEG_PILL[r.segmento]||'ng';
-    const comp = agNombre(r.ag_comp);
-    const vend = agNombre(r.ag_vend);
+    const comp=agNombre(r.ag_comp);
+    const vend=agNombre(r.ag_vend);
     return`<tr>
       <td>${r.fecha}</td>
       <td><span class="pill ${p}">${r.segmento}</span></td>
@@ -15858,8 +15868,18 @@ function renderTable(data){
       <td class="monto-v" style="text-align:right">${fmtFull(r.monto)}</td>
       <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${r.resp}">${r.resp}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${r.ben}">${r.ben}</td>
-    </tr>`;}).join('');
+    </tr>`;
+  };
+  const extra=!_tableShowAll&&data.length>TABLE_PAGE
+    ?`<tr><td colspan="12" style="text-align:center;padding:10px;color:#8A9BBB;font-size:12px">
+        Mostrando ${TABLE_PAGE} de ${data.length} filas —
+        <a href="#" style="color:#2060A0" onclick="event.preventDefault();_tableShowAll=true;renderTable(_lastTableData)">Ver todas</a>
+      </td></tr>`
+    :'';
+  tb.innerHTML=rows.map(mkRow).join('')+extra;
+  _lastTableData=data;
 }
+let _lastTableData=[];
 
 // ── DESCARGA ──────────────────────────────────────────────────────────────
 function descargarDashboard(){
@@ -15913,60 +15933,20 @@ function renderEvolucion(data){
       spanGaps:false,
     }));
 
-    if(CHARTS['cEvoVol'])CHARTS['cEvoVol'].destroy();
-    CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),{
-      type:'line',
-      data:{labels:rLabels, datasets},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-          tooltip:{mode:'index',intersect:false,
-            callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}
-        },
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-          y:{grid:{color:'#F0F2F5'},
-            title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
-            ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}
-        }
-      }
-    });
-
+    _updateEvoVolChart({labels:rLabels,datasets});
   } else {
-    // ── SIN SELECCIÓN: línea de tasa promedio por segmento activo, eje X = rango de plazo ──
-    const palette2 = segsActivos.map(s=>SEG_C[s]);
-    const datasets = segsActivos.map((seg,i)=>({
-      label: seg,
-      data: RANGOS.map(rng=>{
+    const palette2=segsActivos.map(s=>SEG_C[s]);
+    const datasets=segsActivos.map((seg,i)=>({
+      label:seg,
+      data:RANGOS.map(rng=>{
         const ops=evoData.filter(r=>r.segmento===seg&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max&&r.tasa!=null);
-        return ops.length ? parseFloat(avg(ops.map(r=>r.tasa)).toFixed(2)) : null;
+        return ops.length?parseFloat(avg(ops.map(r=>r.tasa)).toFixed(2)):null;
       }),
-      borderColor:     palette2[i],
-      backgroundColor: palette2[i]+'18',
-      borderWidth:2.5, fill:false, tension:.3,
-      pointRadius:5, pointHoverRadius:7,
-      pointBackgroundColor: palette2[i],
-      spanGaps:false,
+      borderColor:palette2[i],backgroundColor:palette2[i]+'18',
+      borderWidth:2.5,fill:false,tension:.3,
+      pointRadius:5,pointHoverRadius:7,pointBackgroundColor:palette2[i],spanGaps:false,
     }));
-
-    if(CHARTS['cEvoVol'])CHARTS['cEvoVol'].destroy();
-    CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),{
-      type:'line',
-      data:{labels:rLabels, datasets},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-          tooltip:{mode:'index',intersect:false,
-            callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}
-        },
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-          y:{grid:{color:'#F0F2F5'},
-            title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
-            ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}
-        }
-      }
-    });
+    _updateEvoVolChart({labels:rLabels,datasets});
   }
 
   // ── Gráfico 2: Volumen por instrumento por rango de plazo ──
@@ -15974,24 +15954,22 @@ function renderEvolucion(data){
   const iclrs=['#2060A0BB','#5BB8D4BB','#1C3557BB','#4A90D9BB','#A0A0A0BB'];
   const instrsActivos = instrs.filter(ins=>data.some(r=>r.instrumento===ins&&r.plazo!=null));
 
-  if(CHARTS['cEvoInstr'])CHARTS['cEvoInstr'].destroy();
-  CHARTS['cEvoInstr']=new Chart(document.getElementById('cEvoInstr').getContext('2d'),{
-    type:'bar',
-    data:{labels:rLabels, datasets:instrsActivos.map(ins=>({
-      label:ins,
-      data:RANGOS.map(rng=>data.filter(r=>r.instrumento===ins&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max)
-                              .reduce((a,r)=>a+(r.monto||0),0)),
-      backgroundColor:iclrs[instrs.indexOf(ins)], borderRadius:3
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}},
-      scales:{
-        x:{stacked:true,grid:{display:false},ticks:{color:'#8A9BBB',font:{size:9}}},
-        y:{stacked:true,grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9},callback:v=>v>0?fmtM(v):''}}
-      }
+  const cEvoInstrData={labels:rLabels,datasets:instrsActivos.map(ins=>({
+    label:ins,
+    data:RANGOS.map(rng=>data.filter(r=>r.instrumento===ins&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max)
+                            .reduce((a,r)=>a+(r.monto||0),0)),
+    backgroundColor:iclrs[instrs.indexOf(ins)],borderRadius:3
+  }))};
+  const cEvoInstrOpts={responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},ticks:{color:'#8A9BBB',font:{size:9}}},
+      y:{stacked:true,grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9},callback:v=>v>0?fmtM(v):''}}
     }
-  });
+  };
+  if(CHARTS['cEvoInstr']){CHARTS['cEvoInstr'].data=cEvoInstrData;CHARTS['cEvoInstr'].options=cEvoInstrOpts;CHARTS['cEvoInstr'].update('none');}
+  else{CHARTS['cEvoInstr']=new Chart(document.getElementById('cEvoInstr').getContext('2d'),{type:'bar',data:cEvoInstrData,options:cEvoInstrOpts});}
 }
 </script>
 
