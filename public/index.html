@@ -196,6 +196,15 @@ tbody td{padding:6px 10px;white-space:nowrap}
   font-family:'DM Sans',sans-serif;outline:none;appearance:none;
 }
 .fsel-date:focus{border-color:var(--celeste)}
+/* Paginación tabla */
+.tbl-pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  padding:8px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--t2)}
+.pag-btn{padding:4px 12px;border-radius:14px;border:1.5px solid var(--border);
+  background:white;color:var(--t2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:border-color .15s,color .15s}
+.pag-btn:hover:not(:disabled){border-color:var(--celeste);color:var(--navy)}
+.pag-btn:disabled{opacity:.35;cursor:default}
+.pag-info{font-weight:500;color:var(--t1)}
 </style>
 </head>
 <body>
@@ -391,6 +400,11 @@ tbody td{padding:6px 10px;white-space:nowrap}
     </tr></tbody>
         </table>
         <div class="empty" id="emptyMsg" style="display: none;">No hay operaciones para los filtros seleccionados.</div>
+        <div class="tbl-pagination" id="tablePagination" style="display:none">
+          <span class="pag-info" id="pagInfo"></span>
+          <button class="pag-btn" id="pagPrev" onclick="changePage(-1)">← Ant.</button>
+          <button class="pag-btn" id="pagNext" onclick="changePage(1)">Sig. →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -15301,11 +15315,20 @@ const SEG_C={'No Garantizado':'#2060A0','Garantizado':'#1C3557','Avalado':'#5BB8
 const SEG_PILL={'No Garantizado':'ng','Garantizado':'gar','Avalado':'av'};
 const SEGS=['No Garantizado','Garantizado','Avalado'];
 
+function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms);};}
+
 function mkChart(id,type,data,opts){
-  if(CHARTS[id])CHARTS[id].destroy();
+  const ex=CHARTS[id];
+  if(ex && ex.config.type===type && ex.data.datasets.length===data.datasets.length){
+    if(data.labels) ex.data.labels=data.labels;
+    data.datasets.forEach((ds,i)=>Object.assign(ex.data.datasets[i],ds));
+    ex.update('none');
+    return;
+  }
+  if(ex) ex.destroy();
   CHARTS[id]=new Chart(document.getElementById(id).getContext('2d'),
     {type,data,options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{}},...opts}});
+      animation:{duration:0},plugins:{legend:{display:false},tooltip:{}},...opts}});
 }
 const getHora=r=>{if(!r.hora||r.hora==='—')return null;const m=r.hora.match(/^(\d{2})/);return m?m[1]+':00':null};
 
@@ -15381,10 +15404,10 @@ function renderMsList(listId, pool, selected, toggleFn, searchVal){
       <span>${r}</span>
     </label>`).join('');
 }
-function filterMsList(){
+const filterMsList=debounce(function(){
   const q=document.getElementById('respSearch').value;
   renderMsList('respList',ALL_RESPS,S.resps,toggleResp,q);
-}
+},250);
 function toggleResp(val){
   S.resps.has(val)?S.resps.delete(val):S.resps.add(val);
   updateRespTrigger();
@@ -15433,10 +15456,10 @@ function buildEvoRespList(seg){
   renderMsList('evoRespList',ALL_EVO_RESPS,EVO_RESPS,toggleEvoResp,'');
   updateEvoRespTrigger();
 }
-function filterEvoMsList(){
+const filterEvoMsList=debounce(function(){
   const q=document.getElementById('evoRespSearch').value;
   renderMsList('evoRespList',ALL_EVO_RESPS,EVO_RESPS,toggleEvoResp,q);
-}
+},250);
 function toggleEvoResp(val){
   EVO_RESPS.has(val)?EVO_RESPS.delete(val):EVO_RESPS.add(val);
   updateEvoRespTrigger();
@@ -15786,41 +15809,26 @@ function renderResumen(data){
     };
   }).filter(Boolean);
 
-  if(CHARTS['cTasas'])CHARTS['cTasas'].destroy();
-  CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),{
-    type:'bubble',
-    data:{
-      datasets: tasasData.map(d=>({
-        label: d.seg,
-        data:[{ x: d.plazo, y: d.tasa, r: 6 }],
-        backgroundColor: SEG_C[d.seg]+'88',
-        borderColor:     SEG_C[d.seg]+'BB',
-        borderWidth: 1,
-      }))
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-        tooltip:{callbacks:{
-          label: ctx=>{
-            const d=ctx.dataset.label;
-            return ` ${d} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`;
-          }
-        }}
-      },
-      scales:{
-        x:{
-          title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},
-          grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}
-        },
-        y:{
-          title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},
-          grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}
-        }
-      }
-    }
-  });
+  const _tasasDs=tasasData.map(d=>({
+    label:d.seg,data:[{x:d.plazo,y:d.tasa,r:6}],
+    backgroundColor:SEG_C[d.seg]+'88',borderColor:SEG_C[d.seg]+'BB',borderWidth:1
+  }));
+  const _tasasOpts={responsive:true,maintainAspectRatio:false,animation:{duration:0},
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`}}},
+    scales:{
+      x:{title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}},
+      y:{title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}}
+    }};
+  const _exTasas=CHARTS['cTasas'];
+  if(_exTasas && _exTasas.data.datasets.length===_tasasDs.length){
+    _tasasDs.forEach((ds,i)=>Object.assign(_exTasas.data.datasets[i],ds));
+    _exTasas.update('none');
+  } else {
+    if(_exTasas)_exTasas.destroy();
+    CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),
+      {type:'bubble',data:{datasets:_tasasDs},options:_tasasOpts});
+  }
 
   // ── Gráfico 3: Volumen por rango de plazo ──
   const RANGOS = [
@@ -15854,12 +15862,29 @@ function renderResumen(data){
   });
 }
 
+const PAGE_SIZE=50;
+let _tableData=[];
+let _tablePage=0;
+
 function renderTable(data){
+  _tableData=data;
+  _tablePage=0;
+  _renderTablePage();
+}
+function changePage(dir){
+  const pages=Math.ceil(_tableData.length/PAGE_SIZE);
+  _tablePage=Math.max(0,Math.min(_tablePage+dir,pages-1));
+  _renderTablePage();
+}
+function _renderTablePage(){
   const tb=document.getElementById('tableBody');
   const em=document.getElementById('emptyMsg');
-  if(!data.length){tb.innerHTML='';em.style.display='';return;}
+  const pag=document.getElementById('tablePagination');
+  if(!_tableData.length){tb.innerHTML='';em.style.display='';pag.style.display='none';return;}
   em.style.display='none';
-  tb.innerHTML=data.map(r=>{
+  const start=_tablePage*PAGE_SIZE;
+  const page=_tableData.slice(start,start+PAGE_SIZE);
+  tb.innerHTML=page.map(r=>{
     const p=SEG_PILL[r.segmento]||'ng';
     return`<tr>
       <td>${r.fecha}</td>
@@ -15872,6 +15897,13 @@ function renderTable(data){
       <td class="monto-v" style="text-align:right">${fmtFull(r.monto)}</td>
       <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${r.resp}">${r.resp}</td>
     </tr>`;}).join('');
+  const total=_tableData.length;
+  const pages=Math.ceil(total/PAGE_SIZE);
+  if(pages<=1){pag.style.display='none';return;}
+  pag.style.display='';
+  document.getElementById('pagInfo').textContent=`${start+1}–${Math.min(start+PAGE_SIZE,total)} de ${total}`;
+  document.getElementById('pagPrev').disabled=_tablePage===0;
+  document.getElementById('pagNext').disabled=_tablePage>=pages-1;
 }
 
 // ── DESCARGA ──────────────────────────────────────────────────────────────
@@ -15926,24 +15958,22 @@ function renderEvolucion(data){
       spanGaps:false,
     }));
 
-    if(CHARTS['cEvoVol'])CHARTS['cEvoVol'].destroy();
-    CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),{
-      type:'line',
-      data:{labels:rLabels, datasets},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-          tooltip:{mode:'index',intersect:false,
-            callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}
-        },
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-          y:{grid:{color:'#F0F2F5'},
-            title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
-            ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}
-        }
-      }
-    });
+    const _evoVolOpts={responsive:true,maintainAspectRatio:false,animation:{duration:0},
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
+        y:{grid:{color:'#F0F2F5'},title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
+          ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}}};
+    const _exEvoVol=CHARTS['cEvoVol'];
+    if(_exEvoVol && _exEvoVol.config.type==='line' && _exEvoVol.data.datasets.length===datasets.length){
+      _exEvoVol.data.labels=rLabels;
+      datasets.forEach((ds,i)=>Object.assign(_exEvoVol.data.datasets[i],ds));
+      _exEvoVol.update('none');
+    } else {
+      if(_exEvoVol)_exEvoVol.destroy();
+      CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),
+        {type:'line',data:{labels:rLabels,datasets},options:_evoVolOpts});
+    }
 
   } else {
     // ── SIN SELECCIÓN: línea de tasa promedio por segmento activo, eje X = rango de plazo ──
@@ -15954,32 +15984,26 @@ function renderEvolucion(data){
         const ops=evoData.filter(r=>r.segmento===seg&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max&&r.tasa!=null);
         return ops.length ? parseFloat(avg(ops.map(r=>r.tasa)).toFixed(2)) : null;
       }),
-      borderColor:     palette2[i],
-      backgroundColor: palette2[i]+'18',
-      borderWidth:2.5, fill:false, tension:.3,
-      pointRadius:5, pointHoverRadius:7,
-      pointBackgroundColor: palette2[i],
-      spanGaps:false,
+      borderColor:palette2[i],backgroundColor:palette2[i]+'18',
+      borderWidth:2.5,fill:false,tension:.3,
+      pointRadius:5,pointHoverRadius:7,pointBackgroundColor:palette2[i],spanGaps:false,
     }));
-
-    if(CHARTS['cEvoVol'])CHARTS['cEvoVol'].destroy();
-    CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),{
-      type:'line',
-      data:{labels:rLabels, datasets},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-          tooltip:{mode:'index',intersect:false,
-            callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}
-        },
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-          y:{grid:{color:'#F0F2F5'},
-            title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
-            ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}
-        }
-      }
-    });
+    const _evoVolOpts2={responsive:true,maintainAspectRatio:false,animation:{duration:0},
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.raw!=null?` ${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`:null}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
+        y:{grid:{color:'#F0F2F5'},title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:10}},
+          ticks:{color:'#8A9BBB',font:{size:10},callback:v=>parseFloat(v).toFixed(2)+'%'}}}};
+    const _exEvoVol2=CHARTS['cEvoVol'];
+    if(_exEvoVol2 && _exEvoVol2.config.type==='line' && _exEvoVol2.data.datasets.length===datasets.length){
+      _exEvoVol2.data.labels=rLabels;
+      datasets.forEach((ds,i)=>Object.assign(_exEvoVol2.data.datasets[i],ds));
+      _exEvoVol2.update('none');
+    } else {
+      if(_exEvoVol2)_exEvoVol2.destroy();
+      CHARTS['cEvoVol']=new Chart(document.getElementById('cEvoVol').getContext('2d'),
+        {type:'line',data:{labels:rLabels,datasets},options:_evoVolOpts2});
+    }
   }
 
   // ── Gráfico 2: Volumen por instrumento por rango de plazo ──
@@ -15987,24 +16011,27 @@ function renderEvolucion(data){
   const iclrs=['#2060A0BB','#5BB8D4BB','#1C3557BB','#4A90D9BB','#A0A0A0BB'];
   const instrsActivos = instrs.filter(ins=>data.some(r=>r.instrumento===ins&&r.plazo!=null));
 
-  if(CHARTS['cEvoInstr'])CHARTS['cEvoInstr'].destroy();
-  CHARTS['cEvoInstr']=new Chart(document.getElementById('cEvoInstr').getContext('2d'),{
-    type:'bar',
-    data:{labels:rLabels, datasets:instrsActivos.map(ins=>({
-      label:ins,
-      data:RANGOS.map(rng=>data.filter(r=>r.instrumento===ins&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max)
-                              .reduce((a,r)=>a+(r.monto||0),0)),
-      backgroundColor:iclrs[instrs.indexOf(ins)], borderRadius:3
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}},
-      scales:{
-        x:{stacked:true,grid:{display:false},ticks:{color:'#8A9BBB',font:{size:9}}},
-        y:{stacked:true,grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9},callback:v=>v>0?fmtM(v):''}}
-      }
-    }
-  });
+  const _evoInstrDs=instrsActivos.map(ins=>({
+    label:ins,
+    data:RANGOS.map(rng=>data.filter(r=>r.instrumento===ins&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max)
+                            .reduce((a,r)=>a+(r.monto||0),0)),
+    backgroundColor:iclrs[instrs.indexOf(ins)],borderRadius:3
+  }));
+  const _evoInstrOpts={responsive:true,maintainAspectRatio:false,animation:{duration:0},
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}},
+    scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#8A9BBB',font:{size:9}}},
+      y:{stacked:true,grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9},callback:v=>v>0?fmtM(v):''}}}};
+  const _exEvoInstr=CHARTS['cEvoInstr'];
+  if(_exEvoInstr && _exEvoInstr.data.datasets.length===_evoInstrDs.length){
+    _exEvoInstr.data.labels=rLabels;
+    _evoInstrDs.forEach((ds,i)=>Object.assign(_exEvoInstr.data.datasets[i],ds));
+    _exEvoInstr.update('none');
+  } else {
+    if(_exEvoInstr)_exEvoInstr.destroy();
+    CHARTS['cEvoInstr']=new Chart(document.getElementById('cEvoInstr').getContext('2d'),
+      {type:'bar',data:{labels:rLabels,datasets:_evoInstrDs},options:_evoInstrOpts});
+  }
 }
 </script>
 
