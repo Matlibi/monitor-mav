@@ -15989,7 +15989,7 @@ function renderEvolucion(data){
   if(EVO_RESPS.size>0){
     // ── CON LIBRADORES: línea de tasa promedio por rango de plazo ──
     const selectedList=[...EVO_RESPS];
-    const palette=['#1A5995','#0075AA','#1C1D5A','#E8720C','#28A086','#9B59B6','#E74C3C','#F39C12','#4A90D9','#8BC4E4'];
+    const palette=['#1C1D5A','#1A5995','#0075AA','#005F8A','#3A6EA8','#6B9DC2','#0A2E6E','#2470B3','#004466','#88AEC8'];
 
     const datasets=selectedList.map((resp,i)=>({
       label: resp.length>28?resp.slice(0,28)+'…':resp,
@@ -16023,7 +16023,7 @@ function renderEvolucion(data){
 
   // ── Gráfico 2: Volumen por instrumento por rango de plazo ──
   const instrs=['ECHEQ','PAGARE','FCE','CPD','PAGARE AJUSTE TAMAR'];
-  const iclrs=['#1A5995BB','#0075AABB','#1C1D5ABB','#4A90D9BB','#A0A0A0BB'];
+  const iclrs=['#1C1D5ABB','#1A5995BB','#0075AABB','#005F8ABB','#8AAFD4BB'];
   const instrsActivos = instrs.filter(ins=>data.some(r=>r.instrumento===ins&&r.plazo!=null));
 
   const cEvoInstrData={labels:rLabels,datasets:instrsActivos.map(ins=>({
