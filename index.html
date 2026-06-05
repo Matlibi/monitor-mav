@@ -474,18 +474,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
             <div class="vsep"></div>
 
-            <!-- Período -->
-            <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Período</span>
-            <select class="fsel-date" id="evoPeriodoFilter" onchange="EVO_PERIODO=this.value;syncEvoFecha();renderEvolucion(getEvoData())">
-              <option value="all">Todo</option>
-              <option value="4">Últimos 4 días</option>
-              <option value="5">Últimos 5 días</option>
-              <option value="7">Últimos 7 días</option>
-              <option value="15">Últimos 15 días</option>
-            </select>
-
-            <div class="vsep"></div>
-
             <!-- Instrumento (solo en evolución) -->
             <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Instrumento</span>
             <select class="fsel-date" id="evoInstrFilter" onchange="EVO_INSTR=this.value;renderEvolucion(getEvoData())"><option value="all">Todos</option><option value="CPD">CPD</option><option value="ECHEQ">ECHEQ</option><option value="FCE">FCE</option><option value="PAGARE">PAGARE</option></select>
@@ -15215,7 +15203,6 @@ let S = { seg:'all', pyme:null, instr:'all', monedas:new Set(), resps:new Set(),
 let _tableSort={col:null,dir:'asc'};
 let EVO_RESPS = new Set();
 let EVO_FECHAS = new Set();
-let EVO_PERIODO = 'all';
 let EVO_INSTR = 'all';
 let EVO_MONEDA = 'all';
 let DB = [...RAW];
@@ -15672,13 +15659,13 @@ function rebuildEvoFechaSelect(){
 }
 function toggleEvoFecha(val){
   EVO_FECHAS.has(val)?EVO_FECHAS.delete(val):EVO_FECHAS.add(val);
-  if(EVO_FECHAS.size>0){EVO_PERIODO='all';document.getElementById('evoPeriodoFilter').value='all';}
+  if(EVO_FECHAS.size>0){}
   updateEvoFechaTrigger(); renderEvolucion(getEvoData());
 }
 function selectAllEvoFecha(){
   const fechas=[...new Set(DB.map(r=>r.fecha))];
   fechas.forEach(f=>EVO_FECHAS.add(f));
-  EVO_PERIODO='all'; document.getElementById('evoPeriodoFilter').value='all';
+   
   rebuildEvoFechaSelect(); updateEvoFechaTrigger(); renderEvolucion(getEvoData());
 }
 function clearEvoFecha(){
@@ -15708,12 +15695,6 @@ function closeEvoFechaMs(){
   const tr=document.getElementById('evoFechaTrigger');
   if(dd){dd.classList.remove('open');}
   if(tr){tr.classList.remove('open');}
-}
-function syncEvoPeriodo(){
-  EVO_FECHAS.clear(); rebuildEvoFechaSelect(); updateEvoFechaTrigger();
-}
-function syncEvoFecha(){
-  EVO_FECHAS.clear(); rebuildEvoFechaSelect(); updateEvoFechaTrigger();
 }
 
 function updatePeriodLabel(){
@@ -15746,14 +15727,9 @@ function getEvoBase(){
 // Datos de evolución: aplica filtros propios de evolución sobre getEvoBase()
 function getEvoData(){
   let base = getEvoBase();
-  if(EVO_FECHAS.size>0)   base = base.filter(r=>EVO_FECHAS.has(r.fecha));
-  if(EVO_PERIODO!=='all'){
-    const fechas = [...new Set(DB.map(r=>r.fecha))].sort((a,b)=>parseFecha(b)-parseFecha(a));
-    const ultimas = fechas.slice(-parseInt(EVO_PERIODO));
-    base = base.filter(r=>ultimas.includes(r.fecha));
-  }
-  if(EVO_INSTR!=='all')   base = base.filter(r=>r.instrumento===EVO_INSTR);
-  if(EVO_MONEDA!=='all')  base = base.filter(r=>r.moneda===EVO_MONEDA);
+  if(EVO_FECHAS.size>0)  base = base.filter(r=>EVO_FECHAS.has(r.fecha));
+  if(EVO_INSTR!=='all')  base = base.filter(r=>r.instrumento===EVO_INSTR);
+  if(EVO_MONEDA!=='all') base = base.filter(r=>r.moneda===EVO_MONEDA);
   return base;
 }
 
@@ -15824,7 +15800,7 @@ function togglePyme(val){
 function resetFilters(){
   S={seg:'all',pyme:null,instr:'all',monedas:new Set(),resps:new Set(),view:S.view,fechas:new Set(),bens:new Set()};
   _tableSort={col:null,dir:'asc'}; _updateSortHeaders();
-  EVO_FECHAS=new Set(); EVO_PERIODO='all'; EVO_INSTR='all'; EVO_MONEDA='all';
+  EVO_FECHAS=new Set();  EVO_INSTR='all'; EVO_MONEDA='all';
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
   document.querySelector('#segBtns .tbtn').classList.add('a-all');
   ['pymeSI','pymeNO'].forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).style.display='none';});
@@ -15832,7 +15808,7 @@ function resetFilters(){
   S.monedas=new Set(); buildMonedaList(); updateMonedaTrigger();
   S.fechas=new Set(); rebuildFechaSelect(); updateFechaTrigger();
   rebuildEvoFechaSelect(); updateEvoFechaTrigger();
-  document.getElementById('evoPeriodoFilter').value='all';
+  
   document.getElementById('respSearch').value='';
   buildRespList('all');
   buildEvoRespList('all');
@@ -16134,6 +16110,5 @@ function _updateSortHeaders(){
   });
 }
 </script>
-
 
 </body></html>
