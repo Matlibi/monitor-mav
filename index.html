@@ -201,6 +201,25 @@ tbody td{padding:6px 10px;white-space:nowrap}
   font-family:'Montserrat',sans-serif;outline:none;appearance:none;
 }
 .fsel-date:focus{border-color:var(--celeste)}
+
+/* Slider de plazo de doble manija */
+.dual-range{position:relative;height:20px}
+.dual-range input[type=range]{
+  position:absolute;top:7px;left:0;width:100%;margin:0;
+  -webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;
+}
+.dual-range input[type=range]::-webkit-slider-runnable-track{height:6px;background:transparent}
+.dual-range input[type=range]::-moz-range-track{height:6px;background:transparent}
+.dual-range input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;pointer-events:auto;width:16px;height:16px;border-radius:50%;
+  background:#1A5995;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;margin-top:0;
+}
+.dual-range input[type=range]::-moz-range-thumb{
+  pointer-events:auto;width:16px;height:16px;border-radius:50%;
+  background:#1A5995;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;
+}
+.dual-range .dr-track{position:absolute;top:7px;left:0;width:100%;height:6px;background:#D7E1ED;border-radius:3px}
+.dual-range .dr-fill{position:absolute;top:7px;height:6px;background:#1A5995;border-radius:3px}
 </style>
 </head>
 <body>
@@ -482,13 +501,20 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
             <!-- Moneda (solo en evolución) -->
             <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Moneda</span>
-            <select class="fsel-date" id="evoMonedaFilter" onchange="EVO_MONEDA=this.value;renderEvolucion(getEvoData())">
-              <option value="all">Todas</option>
-              <option value="$">ARS $</option>
-              <option value="DOL">DOL</option>
-              <option value="U$D">U$D</option>
-              <option value="U$S">U$S</option>
-            </select>
+            <div class="ms-wrap" id="evoMonedaWrap">
+              <div class="ms-trigger" id="evoMonedaTrigger" onclick="toggleEvoMonedaMs()">
+                <span id="evoMonedaTriggerLabel">Todas</span>
+                <span class="ms-count hidden" id="evoMonedaCount">1</span>
+                <svg width="9" height="5" viewBox="0 0 9 5" fill="none"><path d="M0 0l4.5 5L9 0z" fill="#8A9BBB"></path></svg>
+              </div>
+              <div class="ms-dropdown" id="evoMonedaDropdown">
+                <div class="ms-actions">
+                  <button class="ms-act-btn" onclick="selectAllEvoMoneda()">Todas</button>
+                  <button class="ms-act-btn" onclick="clearEvoMoneda()">Limpiar</button>
+                </div>
+                <div class="ms-list" id="evoMonedaList"></div>
+              </div>
+            </div>
 
             <div class="vsep"></div>
 
@@ -15181,19 +15207,21 @@ tbody td{padding:6px 10px;white-space:nowrap}
           </div>
         </div>
 
-        <!-- Barra de plazo máximo de las curvas -->
+        <!-- Barra de rango de plazo de las curvas (doble manija) -->
         <div style="display:flex;align-items:center;gap:14px;background:#F4F7FB;border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:13px">
-          <span style="font-size:11px;font-weight:700;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Plazo máximo</span>
+          <span style="font-size:11px;font-weight:700;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Rango de plazo</span>
           <div style="flex:1;max-width:480px">
-            <input type="range" id="evoPlazoSlider" min="30" max="360" step="30" value="90"
-              oninput="document.getElementById('evoPlazoLabel').textContent=this.value+'d'"
-              onchange="EVO_PLAZO_MAX=parseInt(this.value,10);renderEvolucion(getEvoData())"
-              style="width:100%;display:block;accent-color:#1A5995;height:6px">
-            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:#8A9BBB;font-weight:600;margin-top:2px">
-              <span>30</span><span>60</span><span>90</span><span>120</span><span>150</span><span>180</span><span>210</span><span>240</span><span>270</span><span>300</span><span>330</span><span>360</span>
+            <div class="dual-range" id="evoPlazoDual">
+              <div class="dr-track"></div>
+              <div class="dr-fill" id="evoPlazoFill"></div>
+              <input type="range" id="evoPlazoMinSlider" min="0" max="330" step="30" value="0" oninput="_evoPlazoInput()">
+              <input type="range" id="evoPlazoMaxSlider" min="30" max="360" step="30" value="90" oninput="_evoPlazoInput()">
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:#8A9BBB;font-weight:600;margin-top:6px">
+              <span>0</span><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span><span>180</span><span>210</span><span>240</span><span>270</span><span>300</span><span>330</span><span>360</span>
             </div>
           </div>
-          <span id="evoPlazoLabel" style="font-size:13px;font-weight:700;color:#1A5995;background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px 10px;min-width:46px;text-align:center">90d</span>
+          <span id="evoPlazoLabel" style="font-size:13px;font-weight:700;color:#1A5995;background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px 10px;min-width:80px;text-align:center;white-space:nowrap">0 – 90d</span>
         </div>
 
         <div style="position:relative;height:240px"><canvas id="cEvoVol" style="box-sizing: border-box; display: block; height: 240px; width: 1836px;" width="1836" height="240"></canvas></div>
@@ -15220,8 +15248,21 @@ let _tableSort={col:null,dir:'asc'};
 let EVO_RESPS = new Set();
 let EVO_FECHAS = new Set();
 let EVO_INSTR = 'all';
-let EVO_MONEDA = 'all';
+let EVO_MONEDAS = new Set();
+let EVO_PLAZO_MIN = 0;
 let EVO_PLAZO_MAX = 90;
+function _evoPlazoInput(){
+  const minEl=document.getElementById('evoPlazoMinSlider');
+  const maxEl=document.getElementById('evoPlazoMaxSlider');
+  let lo=parseInt(minEl.value,10), hi=parseInt(maxEl.value,10);
+  if(lo>hi-30){ lo=hi-30; minEl.value=lo; }
+  EVO_PLAZO_MIN=lo; EVO_PLAZO_MAX=hi;
+  const pctLo=(lo-0)/(360-0)*100, pctHi=(hi-0)/(360-0)*100;
+  const fill=document.getElementById('evoPlazoFill');
+  fill.style.left=pctLo+'%'; fill.style.width=(pctHi-pctLo)+'%';
+  document.getElementById('evoPlazoLabel').textContent=`${lo} – ${hi}d`;
+  renderEvolucion(getEvoData());
+}
 let DB = [...RAW];
 const CHARTS = {};
 function _debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
@@ -15414,6 +15455,12 @@ window.addEventListener('DOMContentLoaded',()=>{
   rebuildFechaSelect();
   rebuildEvoFechaSelect();
   buildEvoRespList('all');
+  buildEvoMonedaList(); updateEvoMonedaTrigger();
+  (function(){
+    const lo=0, hi=90;
+    document.getElementById('evoPlazoFill').style.left=(lo/360*100)+'%';
+    document.getElementById('evoPlazoFill').style.width=((hi-lo)/360*100)+'%';
+  })();
 
   // Beneficiario
   buildBenList();
@@ -15426,6 +15473,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     if(!document.getElementById('fechaWrap').contains(e.target)) closeFechaMs();
     if(!document.getElementById('evoFechaWrap').contains(e.target)) closeEvoFechaMs();
     if(!document.getElementById('monedaWrap').contains(e.target)) closeMonedaMs();
+    if(!document.getElementById('evoMonedaWrap').contains(e.target)) closeEvoMonedaMs();
   });
 
   applyFilters();
@@ -15746,7 +15794,7 @@ function getEvoData(){
   let base = getEvoBase();
   if(EVO_FECHAS.size>0)  base = base.filter(r=>EVO_FECHAS.has(r.fecha));
   if(EVO_INSTR!=='all')  base = base.filter(r=>r.instrumento===EVO_INSTR);
-  if(EVO_MONEDA!=='all') base = base.filter(r=>r.moneda===EVO_MONEDA);
+  if(EVO_MONEDAS.size>0) base = base.filter(r=>EVO_MONEDAS.has(r.moneda));
   return base;
 }
 
@@ -15817,7 +15865,7 @@ function togglePyme(val){
 function resetFilters(){
   S={seg:'all',pyme:null,instr:'all',monedas:new Set(),resps:new Set(),view:S.view,fechas:new Set(),bens:new Set()};
   _tableSort={col:null,dir:'asc'}; _updateSortHeaders();
-  EVO_FECHAS=new Set();  EVO_INSTR='all'; EVO_MONEDA='all';
+  EVO_FECHAS=new Set();  EVO_INSTR='all'; EVO_MONEDAS=new Set();
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
   document.querySelector('#segBtns .tbtn').classList.add('a-all');
   ['pymeSI','pymeNO'].forEach(id=>{document.getElementById(id).classList.remove('active');document.getElementById(id).style.display='none';});
@@ -15825,7 +15873,8 @@ function resetFilters(){
   S.monedas=new Set(); buildMonedaList(); updateMonedaTrigger();
   S.fechas=new Set(); rebuildFechaSelect(); updateFechaTrigger();
   rebuildEvoFechaSelect(); updateEvoFechaTrigger();
-  
+  buildEvoMonedaList(); updateEvoMonedaTrigger();
+
   document.getElementById('respSearch').value='';
   buildRespList('all');
   buildEvoRespList('all');
@@ -15992,7 +16041,7 @@ function descargarDashboard(){
 // ── EVOLUCIÓN ─────────────────────────────────────────────────────────────
 function renderEvolucion(data){
   const RANGOS = [];
-  for(let d=30; d<=EVO_PLAZO_MAX; d+=30){
+  for(let d=EVO_PLAZO_MIN+30; d<=EVO_PLAZO_MAX; d+=30){
     RANGOS.push({label:`${d-29}-${d}d`, min:d-29, max:d});
   }
   RANGOS.push({label:`+${EVO_PLAZO_MAX}d`, min:EVO_PLAZO_MAX+1, max:Infinity});
@@ -16099,12 +16148,56 @@ function toggleMonedaMs(){
   const dd=document.getElementById('monedaDropdown');
   const tr=document.getElementById('monedaTrigger');
   const open=dd.classList.contains('open');
-  closeMs();closeEvoMs();closeBenMs();closeFechaMs();closeEvoFechaMs();closeMonedaMs();
+  closeMs();closeEvoMs();closeBenMs();closeFechaMs();closeEvoFechaMs();closeMonedaMs();closeEvoMonedaMs();
   if(!open){dd.classList.add('open');tr.classList.add('open');}
 }
 function closeMonedaMs(){
   document.getElementById('monedaDropdown').classList.remove('open');
   document.getElementById('monedaTrigger').classList.remove('open');
+}
+
+// ── MULTISELECT MONEDA (evolución) ───────────────────────────────────────
+let ALL_EVO_MONEDAS=[];
+function buildEvoMonedaList(){
+  ALL_EVO_MONEDAS=[...new Set(getEvoBase().map(r=>r.moneda))].filter(Boolean).sort();
+  EVO_MONEDAS=new Set([...EVO_MONEDAS].filter(m=>ALL_EVO_MONEDAS.includes(m)));
+  const el=document.getElementById('evoMonedaList');
+  el.innerHTML=ALL_EVO_MONEDAS.map(m=>`
+    <label class="ms-item">
+      <input type="checkbox" ${EVO_MONEDAS.has(m)?'checked':''} onchange="toggleEvoMoneda('${m}')">
+      <span>${m}</span>
+    </label>`).join('');
+}
+function toggleEvoMoneda(val){
+  EVO_MONEDAS.has(val)?EVO_MONEDAS.delete(val):EVO_MONEDAS.add(val);
+  updateEvoMonedaTrigger(); renderEvolucion(getEvoData());
+}
+function selectAllEvoMoneda(){
+  ALL_EVO_MONEDAS.forEach(m=>EVO_MONEDAS.add(m));
+  buildEvoMonedaList(); updateEvoMonedaTrigger(); renderEvolucion(getEvoData());
+}
+function clearEvoMoneda(){
+  EVO_MONEDAS.clear();
+  buildEvoMonedaList(); updateEvoMonedaTrigger(); renderEvolucion(getEvoData());
+}
+function updateEvoMonedaTrigger(){
+  const n=EVO_MONEDAS.size;
+  const lbl=document.getElementById('evoMonedaTriggerLabel');
+  const cnt=document.getElementById('evoMonedaCount');
+  const trg=document.getElementById('evoMonedaTrigger');
+  if(n===0){lbl.textContent='Todas';cnt.classList.add('hidden');trg.classList.remove('has-val');}
+  else{lbl.textContent=n===1?[...EVO_MONEDAS][0]:'Varias';cnt.textContent=n;cnt.classList.remove('hidden');trg.classList.add('has-val');}
+}
+function toggleEvoMonedaMs(){
+  const dd=document.getElementById('evoMonedaDropdown');
+  const tr=document.getElementById('evoMonedaTrigger');
+  const open=dd.classList.contains('open');
+  closeMs();closeEvoMs();closeBenMs();closeFechaMs();closeEvoFechaMs();closeMonedaMs();closeEvoMonedaMs();
+  if(!open){dd.classList.add('open');tr.classList.add('open');}
+}
+function closeEvoMonedaMs(){
+  document.getElementById('evoMonedaDropdown').classList.remove('open');
+  document.getElementById('evoMonedaTrigger').classList.remove('open');
 }
 
 // ── SORT TABLA ────────────────────────────────────────────────────────────
