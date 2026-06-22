@@ -492,18 +492,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
             <div class="vsep"></div>
 
-            <!-- Plazo máximo de las curvas -->
-            <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Plazo</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <input type="range" id="evoPlazoSlider" min="30" max="360" step="30" value="90"
-                oninput="document.getElementById('evoPlazoLabel').textContent=this.value+'d'"
-                onchange="EVO_PLAZO_MAX=parseInt(this.value,10);renderEvolucion(getEvoData())"
-                style="width:110px">
-              <span id="evoPlazoLabel" style="font-size:11px;font-weight:600;color:var(--navy-mid);min-width:34px">90d</span>
-            </div>
-
-            <div class="vsep"></div>
-
             <!-- Librador / SGR (contextual al segmento) -->
             <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Librador / SGR</span>
             <div class="ms-wrap" id="evoRespWrap">
@@ -15192,6 +15180,22 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
           </div>
         </div>
+
+        <!-- Barra de plazo máximo de las curvas -->
+        <div style="display:flex;align-items:center;gap:14px;background:#F4F7FB;border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:13px">
+          <span style="font-size:11px;font-weight:700;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Plazo máximo</span>
+          <div style="flex:1;max-width:480px">
+            <input type="range" id="evoPlazoSlider" min="30" max="360" step="30" value="90"
+              oninput="document.getElementById('evoPlazoLabel').textContent=this.value+'d'"
+              onchange="EVO_PLAZO_MAX=parseInt(this.value,10);renderEvolucion(getEvoData())"
+              style="width:100%;display:block;accent-color:#1A5995;height:6px">
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:#8A9BBB;font-weight:600;margin-top:2px">
+              <span>30</span><span>60</span><span>90</span><span>120</span><span>150</span><span>180</span><span>210</span><span>240</span><span>270</span><span>300</span><span>330</span><span>360</span>
+            </div>
+          </div>
+          <span id="evoPlazoLabel" style="font-size:13px;font-weight:700;color:#1A5995;background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px 10px;min-width:46px;text-align:center">90d</span>
+        </div>
+
         <div style="position:relative;height:240px"><canvas id="cEvoVol" style="box-sizing: border-box; display: block; height: 240px; width: 1836px;" width="1836" height="240"></canvas></div>
       </div>
 
