@@ -492,6 +492,18 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
             <div class="vsep"></div>
 
+            <!-- Plazo máximo de las curvas -->
+            <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Plazo</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="range" id="evoPlazoSlider" min="30" max="360" step="30" value="90"
+                oninput="document.getElementById('evoPlazoLabel').textContent=this.value+'d'"
+                onchange="EVO_PLAZO_MAX=parseInt(this.value,10);renderEvolucion(getEvoData())"
+                style="width:110px">
+              <span id="evoPlazoLabel" style="font-size:11px;font-weight:600;color:var(--navy-mid);min-width:34px">90d</span>
+            </div>
+
+            <div class="vsep"></div>
+
             <!-- Librador / SGR (contextual al segmento) -->
             <span style="font-size:10.5px;font-weight:600;color:var(--navy-mid);text-transform:uppercase;letter-spacing:.5px">Librador / SGR</span>
             <div class="ms-wrap" id="evoRespWrap">
@@ -15205,6 +15217,7 @@ let EVO_RESPS = new Set();
 let EVO_FECHAS = new Set();
 let EVO_INSTR = 'all';
 let EVO_MONEDA = 'all';
+let EVO_PLAZO_MAX = 90;
 let DB = [...RAW];
 const CHARTS = {};
 function _debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
@@ -15974,12 +15987,11 @@ function descargarDashboard(){
 
 // ── EVOLUCIÓN ─────────────────────────────────────────────────────────────
 function renderEvolucion(data){
-  const RANGOS = [
-    {label:'1-30d',  min:1,  max:30},
-    {label:'31-60d', min:31, max:60},
-    {label:'61-90d', min:61, max:90},
-    {label:'+90d',   min:91, max:Infinity},
-  ];
+  const RANGOS = [];
+  for(let d=30; d<=EVO_PLAZO_MAX; d+=30){
+    RANGOS.push({label:`${d-29}-${d}d`, min:d-29, max:d});
+  }
+  RANGOS.push({label:`+${EVO_PLAZO_MAX}d`, min:EVO_PLAZO_MAX+1, max:Infinity});
   const rLabels = RANGOS.map(r=>r.label);
 
   const evoData  = EVO_RESPS.size>0 ? data.filter(r=>EVO_RESPS.has(r.resp)) : data;
