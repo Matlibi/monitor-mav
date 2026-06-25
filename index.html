@@ -15222,9 +15222,11 @@ function _evoPlazoInput(){
   let lo=parseInt(minEl.value,10), hi=parseInt(maxEl.value,10);
   if(lo>hi-30){ lo=hi-30; minEl.value=lo; }
   EVO_PLAZO_MIN=lo; EVO_PLAZO_MAX=hi;
-  const pctLo=(lo-0)/(360-0)*100, pctHi=(hi-0)/(360-0)*100;
+  const fracLo=(lo-0)/(360-0), fracHi=(hi-0)/(360-0);
   const fill=document.getElementById('evoPlazoFill');
-  fill.style.left=pctLo+'%'; fill.style.width=(pctHi-pctLo)+'%';
+  const T=16; // ancho del thumb (debe coincidir con dual-range input[type=range]::thumb)
+  fill.style.left=`calc(${T/2}px + (100% - ${T}px) * ${fracLo})`;
+  fill.style.width=`calc((100% - ${T}px) * ${fracHi-fracLo})`;
   document.getElementById('evoPlazoLabel').textContent=`${lo} – ${hi}d`;
   renderEvolucion(getEvoData());
 }
@@ -15429,9 +15431,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   buildEvoRespList('all');
   buildEvoMonedaList(); updateEvoMonedaTrigger();
   (function(){
-    const lo=0, hi=90;
-    document.getElementById('evoPlazoFill').style.left=(lo/360*100)+'%';
-    document.getElementById('evoPlazoFill').style.width=((hi-lo)/360*100)+'%';
+    const lo=0, hi=90, T=16;
+    const fracLo=lo/360, fracHi=hi/360;
+    document.getElementById('evoPlazoFill').style.left=`calc(${T/2}px + (100% - ${T}px) * ${fracLo})`;
+    document.getElementById('evoPlazoFill').style.width=`calc((100% - ${T}px) * ${fracHi-fracLo})`;
   })();
 
   // Cerrar dropdowns al click afuera
