@@ -117,7 +117,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--t1);fo
 .main{padding:18px 24px;display:flex;flex-direction:column;gap:16px}
 
 /* KPIs */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:11px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
 .kcard{background:var(--surface);border-radius:10px;padding:14px 15px;
   box-shadow:var(--sh);border-top:3px solid transparent;transition:transform .15s}
 .kcard:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
@@ -284,7 +284,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
     <!-- Vista toggle empujado a la derecha -->
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button class="reset-btn" onclick="resetFilters()">↺ Limpiar</button>
-      <span class="res-badge" id="resBadge">4 ops</span>
       <div class="view-toggle">
         <button class="vtbtn active" id="vt-resumen" onclick="setView('resumen')">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="0" y="0" width="5" height="5" rx="1" fill="currentColor" opacity=".7"></rect><rect x="7" y="0" width="6" height="5" rx="1" fill="currentColor"></rect><rect x="0" y="7" width="6" height="6" rx="1" fill="currentColor"></rect><rect x="8" y="7" width="5" height="6" rx="1" fill="currentColor" opacity=".7"></rect></svg>
@@ -395,7 +394,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
   <div class="kpi-row">
     <div class="kcard c1"><div class="kval" id="kVol">$136mm</div><div class="klbl">Volumen operado (ARS)</div></div>
     <div class="kcard c2"><div class="kval" id="kOps">4</div><div class="klbl">Operaciones negociadas</div></div>
-    <div class="kcard c3"><div class="kval" id="kInst">4</div><div class="klbl">Instrumentos negociados</div></div>
     <div class="kcard c1"><div class="kval" id="kTasa">24.3%</div><div class="klbl">Tasa TNA promedio (col O)</div></div>
     <div class="kcard c2"><div class="kval" id="kPlazo">59d</div><div class="klbl">Plazo promedio (días)</div></div>
     <div class="kcard c3"><div class="kval" id="kPyme">100%</div><div class="klbl">Participación PyME</div></div>
@@ -404,93 +402,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
   <!-- VISTA RESUMEN -->
   <div id="panel-resumen" class="view-panel">
     <div class="charts-row">
-      <div class="card">
-        <div class="ctitle">Volumen por segmento</div>
-        <div class="cbar"><canvas id="cVol" style="box-sizing: border-box; display: block; height: 190px; width: 812px;" width="812" height="190"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="ctitle">Tasas TNA por segmento</div>
-        <div class="cbar"><canvas id="cTasas" style="box-sizing: border-box; display: block; height: 190px; width: 462px;" width="462" height="190"></canvas></div>
-      </div>
-    <div class="tbl-card">
-      <div class="tbl-head">
-        <div class="ctitle" style="margin:0;border:none;padding:0">Operaciones negociadas — detalle</div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr>
-            <th>Fecha Negoc.</th><th>Segmento</th><th>PyME</th><th>Instrumento</th>
-            <th class="th-sort" onclick="setTableSort('plazo')" id="th-plazo">Plazo (días) <span class="sort-arrow"></span></th>
-            <th>Agente Comprador</th>
-            <th class="th-sort" onclick="setTableSort('tasa')" id="th-tasa">Tasa Operada TNA% <span class="sort-arrow"></span></th>
-            <th>Agente Vendedor</th><th>Moneda</th><th>Monto Negociado</th>
-            <th>Nombre Responsable / SGR</th><th>Razón Social Beneficiario</th><th>Beneficiario Final</th>
-          </tr></thead>
-          <tbody id="tableBody"><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">56</td>
-      <td class="mono" style="white-space:nowrap" title="287 · ARG SECURITIES ADVISORS S.A.">287 · ARG SECURITIES ADVISORS S.A.</td>
-      <td><span class="tasa-v">23.0%</span></td>
-      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 18.803.808,93</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">71</td>
-      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
-      <td><span class="tasa-v">25.0%</span></td>
-      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 11.086.154,46</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">52</td>
-      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
-      <td><span class="tasa-v">25.0%</span></td>
-      <td class="mono" style="white-space:nowrap" title="727 · PETRINI VALORES S.A.">727 · PETRINI VALORES S.A.</td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 83.552.527,77</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="SERVET SOCIEDAD ANONIMA">SERVET SOCIEDAD ANONIMA</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">58</td>
-      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
-      <td><span class="tasa-v">24.0%</span></td>
-      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 22.803.257,21</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
-    </tr></tbody>
-        </table>
-        <div class="empty" id="emptyMsg" style="display: none;">No hay operaciones para los filtros seleccionados.</div>
-      </div>
-    </div>
-    </div>
-  </div>
-
-  <!-- VISTA EVOLUCIÓN -->
-  <div id="panel-evolucion" class="view-panel hidden">
-    <div class="evo-grid">
-
-      <!-- Gráfico principal con filtros de evolución -->
       <div class="card evo-full">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;padding-bottom:9px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px">
           <div class="ctitle" style="margin:0;border:none;padding:0" id="evoVolTitle">Tasa TNA promedio por segmento — por rango de plazo</div>
@@ -15248,7 +15159,83 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
         <div style="position:relative;height:240px"><canvas id="cEvoVol" style="box-sizing: border-box; display: block; height: 240px; width: 1836px;" width="1836" height="240"></canvas></div>
       </div>
+    <div class="tbl-card">
+      <div class="tbl-head">
+        <div class="ctitle" style="margin:0;border:none;padding:0">Operaciones negociadas — detalle</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Fecha Negoc.</th><th>Segmento</th><th>PyME</th><th>Instrumento</th>
+            <th class="th-sort" onclick="setTableSort('plazo')" id="th-plazo">Plazo (días) <span class="sort-arrow"></span></th>
+            <th>Agente Comprador</th>
+            <th class="th-sort" onclick="setTableSort('tasa')" id="th-tasa">Tasa Operada TNA% <span class="sort-arrow"></span></th>
+            <th>Agente Vendedor</th><th>Moneda</th><th>Monto Negociado</th>
+            <th>Nombre Responsable / SGR</th><th>Razón Social Beneficiario</th><th>Beneficiario Final</th>
+          </tr></thead>
+          <tbody id="tableBody"><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">56</td>
+      <td class="mono" style="white-space:nowrap" title="287 · ARG SECURITIES ADVISORS S.A.">287 · ARG SECURITIES ADVISORS S.A.</td>
+      <td><span class="tasa-v">23.0%</span></td>
+      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 18.803.808,93</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">71</td>
+      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
+      <td><span class="tasa-v">25.0%</span></td>
+      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 11.086.154,46</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">52</td>
+      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
+      <td><span class="tasa-v">25.0%</span></td>
+      <td class="mono" style="white-space:nowrap" title="727 · PETRINI VALORES S.A.">727 · PETRINI VALORES S.A.</td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 83.552.527,77</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="SERVET SOCIEDAD ANONIMA">SERVET SOCIEDAD ANONIMA</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">58</td>
+      <td class="mono" style="white-space:nowrap" title="523 · ALCHEMY VALORES S.A.">523 · ALCHEMY VALORES S.A.</td>
+      <td><span class="tasa-v">24.0%</span></td>
+      <td class="mono" style="white-space:nowrap" title="526 · BUENOS AIRES VALORES S.A.">526 · BUENOS AIRES VALORES S.A.</td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 22.803.257,21</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="RED PERSCE S.A.">RED PERSCE S.A.</td>
+    </tr></tbody>
+        </table>
+        <div class="empty" id="emptyMsg" style="display: none;">No hay operaciones para los filtros seleccionados.</div>
+      </div>
+    </div>
+    </div>
+  </div>
 
+  <!-- VISTA EVOLUCIÓN -->
+  <div id="panel-evolucion" class="view-panel hidden">
+    <div class="evo-grid">
       <!-- Volumen por instrumento -->
       <div class="card evo-full">
         <div class="ctitle">Volumen por instrumento — por rango de plazo</div>
@@ -15447,17 +15434,6 @@ const SEG_C={'No Garantizado':'#1A5995','Garantizado':'#1C1D5A','Avalado':'#0075
 const SEG_PILL={'No Garantizado':'ng','Garantizado':'gar','Avalado':'av'};
 const SEGS=['No Garantizado','Garantizado','Avalado'];
 
-function mkChart(id,type,data,opts){
-  const fullOpts={responsive:true,maintainAspectRatio:false,animation:false,
-    plugins:{legend:{display:false},tooltip:{}},...opts};
-  if(CHARTS[id]){
-    CHARTS[id].data=data;
-    CHARTS[id].options=fullOpts;
-    CHARTS[id].update('none');
-    return;
-  }
-  CHARTS[id]=new Chart(document.getElementById(id).getContext('2d'),{type,data,options:fullOpts});
-}
 const getHora=r=>{if(!r.hora||r.hora==='—')return null;const m=r.hora.match(/^(\d{2})/);return m?m[1]+':00':null};
 
 // ── INIT ──────────────────────────────────────────────────────────────────
@@ -15937,10 +15913,9 @@ function setView(v){
 function applyFilters(){
   const data=getFiltered();
   _tableShowAll=false;
-  document.getElementById('resBadge').textContent=data.length+' ops';
   renderKPIs(data);
-  if(S.view==='resumen'){renderResumen(data);renderTable(data);}
-  else renderEvolucion(getEvoData());
+  renderEvolucion(getEvoData());
+  if(S.view==='resumen'){renderTable(data);}
 }
 
 function renderKPIs(data){
@@ -15953,66 +15928,9 @@ function renderKPIs(data){
   const tasaProm=wavgTasa(data);
   document.getElementById('kVol').textContent=fmtM(volArs);
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
-  document.getElementById('kInst').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kTasa').textContent=tasaProm!=null?tasaProm.toFixed(1)+'%':'—';
   document.getElementById('kPlazo').textContent=plazoCnt?Math.round(plazoSum/plazoCnt)+'d':'—';
   document.getElementById('kPyme').textContent=data.length?Math.round(pymeCnt/data.length*100)+'%':'—';
-}
-
-function renderResumen(data){
-  // Segmentos presentes en los datos filtrados (no mostrar vacíos)
-  const segsActivos = SEGS.filter(s=>data.some(r=>r.segmento===s));
-  const segsLabels  = segsActivos.length ? segsActivos : SEGS;
-
-  // ── Gráfico 1: Volumen por segmento ──
-  mkChart('cVol','bar',{
-    labels: segsLabels,
-    datasets:[{
-      data: segsLabels.map(s=>data.filter(r=>r.segmento===s).reduce((a,r)=>a+(r.monto||0),0)),
-      backgroundColor: segsLabels.map(s=>SEG_C[s]+'CC'),
-      borderColor:     segsLabels.map(s=>SEG_C[s]),
-      borderWidth:1.5, borderRadius:6
-    }]
-  },{
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtM(ctx.raw)}}},
-    scales:{
-      x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-      y:{grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>fmtM(v)}}
-    }
-  });
-
-  // ── Gráfico 2: Tasa promedio + plazo promedio por segmento (scatter) ──
-  const tasasData = segsLabels.map(s=>{
-    const ops = data.filter(r=>r.segmento===s&&r.tasa!=null&&r.plazo!=null);
-    const tasaW = wavgTasa(ops);
-    if(!ops.length||tasaW==null) return null;
-    return {
-      tasa:  parseFloat(tasaW.toFixed(2)),
-      plazo: parseFloat(avg(ops.map(r=>r.plazo)).toFixed(1)),
-      seg:   s
-    };
-  }).filter(Boolean);
-
-  const cTasasData={datasets:tasasData.map(d=>({
-    label:d.seg,
-    data:[{x:d.plazo,y:d.tasa,r:6}],
-    backgroundColor:SEG_C[d.seg]+'88',
-    borderColor:SEG_C[d.seg]+'BB',
-    borderWidth:1,
-  }))};
-  const cTasasOpts={responsive:true,maintainAspectRatio:false,animation:false,
-    plugins:{
-      legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-      tooltip:{callbacks:{label:ctx=>{const d=ctx.dataset.label;return ` ${d} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`;}}}
-    },
-    scales:{
-      x:{title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}},
-      y:{title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}}
-    }
-  };
-  if(CHARTS['cTasas']){CHARTS['cTasas'].data=cTasasData;CHARTS['cTasas'].options=cTasasOpts;CHARTS['cTasas'].update('none');}
-  else{CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),{type:'bubble',data:cTasasData,options:cTasasOpts});}
-
 }
 
 const TABLE_PAGE=300;
