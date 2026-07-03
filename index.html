@@ -106,18 +106,11 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--t1);fo
 .res-badge{background:var(--cel-lt);color:var(--cel-mid);padding:3px 10px;
   border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
 
-/* View toggle */
-.view-toggle{display:flex;gap:4px;background:#E6ECF4;border-radius:20px;padding:3px;margin-left:auto}
-.vtbtn{padding:5px 14px;border-radius:16px;border:none;background:transparent;
-  color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;
-  font-family:'Montserrat',sans-serif;display:flex;align-items:center;gap:5px}
-.vtbtn.active{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(28,29,90,.2)}
-
 /* MAIN */
 .main{padding:18px 24px;display:flex;flex-direction:column;gap:16px}
 
 /* KPIs */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:11px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
 .kcard{background:var(--surface);border-radius:10px;padding:14px 15px;
   box-shadow:var(--sh);border-top:3px solid transparent;transition:transform .15s}
 .kcard:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
@@ -140,9 +133,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--t1);fo
 .charts-row>*{min-width:0}
 
 /* Evolución */
-.evo-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .evo-full{grid-column:1/-1}
-.evo-grid>*{min-width:0}
 
 /* Tabla */
 .tbl-card{background:var(--surface);border-radius:10px;box-shadow:var(--sh);overflow:hidden}
@@ -227,7 +218,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
 /* RESPONSIVE */
 @media (max-width:1024px){
   .kpi-row{grid-template-columns:repeat(3,1fr)}
-  .charts-row,.evo-grid{grid-template-columns:1fr}
+  .charts-row{grid-template-columns:1fr}
 }
 @media (max-width:680px){
   .hdr{flex-wrap:wrap;height:auto;min-height:56px;padding:10px 16px;row-gap:8px}
@@ -236,7 +227,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
   .toolbar{padding:0 14px}
   .main{padding:14px;gap:12px}
   .kpi-row{grid-template-columns:repeat(2,1fr)}
-  .view-toggle{margin-left:0}
   .ms-dropdown{max-width:calc(100vw - 28px)}
 }
 @media (max-width:420px){
@@ -281,25 +271,13 @@ tbody td{padding:6px 10px;white-space:nowrap}
     <button class="ptog active" id="pymeSI" onclick="togglePyme('SI')" style="display:none"><span class="pdot"></span>PyME</button>
     <button class="ptog" id="pymeNO" onclick="togglePyme('NO')" style="display:none">No PyME</button>
 
-    <!-- Vista toggle empujado a la derecha -->
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button class="reset-btn" onclick="resetFilters()">↺ Limpiar</button>
-      <span class="res-badge" id="resBadge">4 ops</span>
-      <div class="view-toggle">
-        <button class="vtbtn active" id="vt-resumen" onclick="setView('resumen')">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="0" y="0" width="5" height="5" rx="1" fill="currentColor" opacity=".7"></rect><rect x="7" y="0" width="6" height="5" rx="1" fill="currentColor"></rect><rect x="0" y="7" width="6" height="6" rx="1" fill="currentColor"></rect><rect x="8" y="7" width="5" height="6" rx="1" fill="currentColor" opacity=".7"></rect></svg>
-          Resumen
-        </button>
-        <button class="vtbtn" id="vt-evolucion" onclick="setView('evolucion')">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polyline points="0,10 3,6 6,8 10,2 13,4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"></polyline></svg>
-          Curvas
-        </button>
-      </div>
     </div>
   </div>
 
-  <!-- FILA 2: Filtros secundarios — solo visibles en Resumen -->
-  <div class="tb-row tb-row2" id="tbRow2" style="">
+  <!-- FILA 2: Filtros secundarios -->
+  <div class="tb-row tb-row2">
     <span class="fl">Instrumento</span>
     <select class="fsel" id="instrFilter" onchange="S.instr=this.value;applyFilters()"><option value="all">Todos los instrumentos</option><option value="CPD">CPD</option><option value="ECHEQ">ECHEQ</option><option value="FCE">FCE</option><option value="PAGARE">PAGARE</option></select>
 
@@ -373,8 +351,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
   <div class="kpi-row">
     <div class="kcard c1"><div class="kval" id="kVol">$136mm</div><div class="klbl">Volumen operado (ARS)</div></div>
     <div class="kcard c2"><div class="kval" id="kOps">4</div><div class="klbl">Operaciones negociadas</div></div>
-    <div class="kcard c3"><div class="kval" id="kInst">4</div><div class="klbl">Instrumentos negociados</div></div>
-    <div class="kcard c1"><div class="kval" id="kTasa">24.3%</div><div class="klbl">Tasa TNA promedio (col O)</div></div>
+    <div class="kcard c1"><div class="kval" id="kTasa">24.3%</div><div class="klbl">Tasa TNA promedio</div></div>
     <div class="kcard c2"><div class="kval" id="kPlazo">59d</div><div class="klbl">Plazo promedio (días)</div></div>
     <div class="kcard c3"><div class="kval" id="kPyme">100%</div><div class="klbl">Participación PyME</div></div>
   </div>
@@ -382,80 +359,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
   <!-- VISTA RESUMEN -->
   <div id="panel-resumen" class="view-panel">
     <div class="charts-row">
-      <div class="card">
-        <div class="ctitle">Volumen por segmento</div>
-        <div class="cbar"><canvas id="cVol" style="box-sizing: border-box; display: block; height: 190px; width: 812px;" width="812" height="190"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="ctitle">Tasas TNA por segmento</div>
-        <div class="cbar"><canvas id="cTasas" style="box-sizing: border-box; display: block; height: 190px; width: 462px;" width="462" height="190"></canvas></div>
-      </div>
-    <div class="tbl-card">
-      <div class="tbl-head">
-        <div class="ctitle" style="margin:0;border:none;padding:0">Operaciones negociadas — detalle</div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr>
-            <th>Fecha Negoc.</th><th>Segmento</th><th>PyME</th><th>Instrumento</th>
-            <th class="th-sort" onclick="setTableSort('plazo')" id="th-plazo">Plazo (días) <span class="sort-arrow"></span></th>
-            <th class="th-sort" onclick="setTableSort('tasa')" id="th-tasa">Tasa Operada TNA% <span class="sort-arrow"></span></th>
-            <th>Moneda</th><th>Monto Negociado</th>
-            <th>Nombre Responsable / SGR</th>
-          </tr></thead>
-          <tbody id="tableBody"><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">56</td>
-      <td><span class="tasa-v">23.0%</span></td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 18.803.808,93</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">71</td>
-      <td><span class="tasa-v">25.0%</span></td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 11.086.154,46</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">52</td>
-      <td><span class="tasa-v">25.0%</span></td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 83.552.527,77</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-    </tr><tr>
-      <td>24/04/2026</td>
-      <td><span class="pill ng">No Garantizado</span></td>
-      <td><span class="pyme-y">✓ SI</span></td>
-      <td><strong>ECHEQ</strong></td>
-      <td style="text-align:center">58</td>
-      <td><span class="tasa-v">24.0%</span></td>
-      <td style="text-align:center">$</td>
-      <td class="monto-v" style="text-align:right">$ 22.803.257,21</td>
-      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
-    </tr></tbody>
-        </table>
-        <div class="empty" id="emptyMsg" style="display: none;">No hay operaciones para los filtros seleccionados.</div>
-      </div>
-    </div>
-    </div>
-  </div>
-
-  <!-- VISTA EVOLUCIÓN -->
-  <div id="panel-evolucion" class="view-panel hidden">
-    <div class="evo-grid">
-
-      <!-- Gráfico principal con filtros de evolución -->
       <div class="card evo-full">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;padding-bottom:9px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px">
           <div class="ctitle" style="margin:0;border:none;padding:0" id="evoVolTitle">Tasa TNA promedio por segmento — por rango de plazo</div>
@@ -15213,13 +15116,64 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
         <div style="position:relative;height:240px"><canvas id="cEvoVol" style="box-sizing: border-box; display: block; height: 240px; width: 1836px;" width="1836" height="240"></canvas></div>
       </div>
-
-      <!-- Volumen por instrumento -->
-      <div class="card evo-full">
-        <div class="ctitle">Volumen por instrumento — por rango de plazo</div>
-        <div style="position:relative;height:200px"><canvas id="cEvoInstr" style="box-sizing: border-box; display: block; height: 200px; width: 1836px;" width="1836" height="200"></canvas></div>
+    <div class="tbl-card">
+      <div class="tbl-head">
+        <div class="ctitle" style="margin:0;border:none;padding:0">Operaciones negociadas — detalle</div>
       </div>
-
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Fecha Negoc.</th><th>Segmento</th><th>PyME</th><th>Instrumento</th>
+            <th class="th-sort" onclick="setTableSort('plazo')" id="th-plazo">Plazo (días) <span class="sort-arrow"></span></th>
+            <th class="th-sort" onclick="setTableSort('tasa')" id="th-tasa">Tasa Operada TNA% <span class="sort-arrow"></span></th>
+            <th>Moneda</th><th>Monto Negociado</th>
+            <th>Nombre Responsable / SGR</th>
+          </tr></thead>
+          <tbody id="tableBody"><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">56</td>
+      <td><span class="tasa-v">23.0%</span></td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 18.803.808,93</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">71</td>
+      <td><span class="tasa-v">25.0%</span></td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 11.086.154,46</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">52</td>
+      <td><span class="tasa-v">25.0%</span></td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 83.552.527,77</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+    </tr><tr>
+      <td>24/04/2026</td>
+      <td><span class="pill ng">No Garantizado</span></td>
+      <td><span class="pyme-y">✓ SI</span></td>
+      <td><strong>ECHEQ</strong></td>
+      <td style="text-align:center">58</td>
+      <td><span class="tasa-v">24.0%</span></td>
+      <td style="text-align:center">$</td>
+      <td class="monto-v" style="text-align:right">$ 22.803.257,21</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="TARJETA NARANJA S.A.U.">TARJETA NARANJA S.A.U.</td>
+    </tr></tbody>
+        </table>
+        <div class="empty" id="emptyMsg" style="display: none;">No hay operaciones para los filtros seleccionados.</div>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -15230,7 +15184,7 @@ const RAW = [{"fecha": "16/03/2026", "segmento": "No Garantizado", "pyme": "NO",
 const AGENTES = {"114": "ROSARIO VALORES S.A.", "789": "A & J NARI S.A.", "640": "ADCAP SECURITIES ARGENTINA S.A.", "636": "ALCORTA VALORES S.A.", "721": "ALYCBUR S.A.", "783": "BRANCATELLI S.A.", "619": "BRIO VALORES S.A.", "648": "CANO BURSATIL S.A.", "822": "CRUZANDO FRONTERAS S.A.", "784": "DILLON WILLIAM S.R.L.", "786": "DINOSAURIO BURSATIL S.A.", "776": "DMA BROKER S.A.", "463": "DRACMA S.A.", "633": "ESTRUCT. FINANCIERAS REGIONALES S.A", "668": "FUTURO BURSATIL S.A.", "655": "FUTUROS Y OPCIONES.COM S.A.", "647": "GMA CAPITAL S.A.", "627": "GUOR INVESTMENTS S.A.", "823": "INTAGRO S.A.", "761": "INTEGRAR S.A.", "376": "INVERTIR ONLINE S.A.U.", "729": "LAGUNA S.B. S.A.", "490": "LOS TILOS BURSATIL S.A.", "650": "MAX CAPITAL S.A.", "623": "NASINI S.A.", "649": "OPTION SECURITIES S.A.", "638": "ROAGRO S.A.", "620": "STC INVERSIONES S.A.", "622": "STOCKBROKERS S.A.", "788": "TARALLO S.A.", "628": "TRANSATLANTICA BURSATIL S.A.", "475": "VERSATIL INV. Y TRANSACCIONES S.A.", "473": "ZOFINGEN SECURITIES S.A.", "734": "ACA VALORES S.A.", "827": "ACONCAGUA VALORES S.A.S.", "545": "ADCAP SECURITIES ARGENTINA S.A.", "510": "AEROMAR VALORES S.A.", "571": "AG VALORES S.A.", "782": "AGROBROKERS S.R.L.", "410": "AGROINVERSIONES PAMPEANAS S.A.", "523": "ALCHEMY VALORES S.A.", "32": "ALCORTA VALORES S.A.", "032": "ALCORTA VALORES S.A.", "793": "ALDAZABAL Y CIA S.A.", "653": "ALFY INVERSIONES S.A.", "264": "ALLARIA AGROFINANZAS S.A.", "406": "ALLARIA S.A.", "572": "ALYCBUR S.A.", "702": "ALYNK S.A.", "780": "ARATA S.A.", "287": "ARG SECURITIES ADVISORS S.A.", "427": "ARGENTINA VALORES S.A.", "548": "ARPENTA VALORES S.A.", "524": "AURUM VALORES S.A.", "401": "AVANTIA VALORES S.A.", "72": "AVIGLIANO y Cia. S.R.L.", "072": "AVIGLIANO y Cia. S.R.L.", "766": "AWA GLOBAL S.A.", "568": "AXON CAPITAL S.A.", "710": "BACS ADMINISTRADORA DE ACTIVOS S.A.", "344": "BAFOMET S.A.", "511": "BAGNARDI Y CIA. S.A.", "559": "BALANZ CAPITAL VALORES S.A.", "447": "BAMBA VALORES S.A.", "652": "BANCO BICA S.A.", "805": "BANCO COINAG S.A.", "778": "BANCO DE COMERCIO S.A.", "304": "BANCO DE CRED. Y SECURITIZACION S.A.", "654": "BANCO DE GALICIA Y BS.AS. SAU", "576": "BANCO DE INV.Y COM.EXT. S.A. (Part.Dir.)", "464": "BANCO DE LA CIUDAD DE BUENOS AIRES", "352": "BANCO DE LA PROVINCIA DE CORDOBA S.A.", "444": "BANCO DE SERVICIOS Y TRANSACCIONES S.A.", "71": "BANCO DE VALORES S.A.", "071": "BANCO DE VALORES S.A.", "728": "BANCO DEL CHUBUT S.A.", "750": "BANCO DEL SOL S.A.", "841": "BANCO DINO S.A.", "787": "BANCO HIPOTECARIO S.A.", "720": "BANCO INDUSTRIAL S.A.", "690": "BANCO MACRO S.A.", "481": "BANCO MERIDIAN S.A.", "415": "BANCO MUNICIPAL DE ROSARIO", "451": "BANCO SUPERVIELLE S.A.", "669": "BANCO VOII S.A.", "466": "BANVAL C.P.", "717": "BARRILLI S.A.", "764": "BECERRA BURSATIL S.A.", "516": "BELL INVESTMENTS S.A.", "449": "BENEDIT BURSATIL S.A.", "345": "BETA GROUP INVERSIONES S.A.", "814": "BIBANK S.A.", "14": "BLD FINANZAS S.A.", "014": "BLD FINANZAS S.A.", "90": "BLUELAKE CAPITAL S.A.", "090": "BLUELAKE CAPITAL S.A.", "829": "BM CAPITAL S.A.", "716": "BOL.COM.CHACO", "6": "BRANCATELLI S.A.", "006": "BRANCATELLI S.A.", "429": "BRIO VALORES AGENTE DE LIQ. Y COMP. S.A.", "565": "BS.AS. CREDITOS Y VALORES S.A.", "826": "BT SECURITIES ARGENTINA S.A.", "526": "BUENOS AIRES VALORES S.A.", "503": "BULL MARKET BROKERS S.A.", "552": "BURPLAZA S.A.", "807": "BURSATIL USPALLATA S.A.", "418": "CABSA S.A.", "838": "CANO BURSATIL S.A.", "509": "CAPITAL MARKETS ARGENTINA S.A.", "897": "CENTAURUS SECURITIES S.A.", "830": "CGI CAPITAL S.A.", "705": "CIA. DE INVERSIONES BURSATILES S.A.", "755": "COCOS CAPITAL S.A.", "537": "COHEN S.A.", "422": "COMAFI BURSATIL S.A.", "493": "CONECTAR BURSATIL S.A.", "567": "CONO SUR INVERSIONES S.A.", "483": "COPPOLA INVERSIONES S.A.", "591": "CRITERIA WM S.A.", "820": "CRUZANDO FRONTERAS S.A.", "522": "CUCCHIARA Y CIA. S.A.", "816": "CZ WEALTH MANAGEMENT S.A.", "785": "DA VALORES S.A.", "723": "DEBURSA ALYC S.A.", "687": "DFC CAPITAL MANAGEMENT S.A.", "762": "DHALMORE CAPITAL S.A.", "815": "DIAZ RIGANTI CEREALES S.A.", "685": "DILLON WILLIAM S.R.L.", "416": "DINOSAURIO BURSATIL S.A.", "703": "DMA BROKER S.A.", "343": "DON CAPITAL S.A.", "540": "DRACMA INVESTMENTS S.A.", "763": "DRACMA S.B. S.A.", "41": "ECO VALORES S.A.", "041": "ECO VALORES S.A.", "794": "ELYCA SERVICIOS GLOBALES S.A.", "434": "ESTRUCT. FINANCIERAS REGIONALES S.A.", "517": "FACIMEX VALORES S.A.", "431": "FEDERAL BURSATIL S.A.", "712": "FERNANDEZ LAYA S.A.", "602": "FERNANDO BIBE E HIJOS S.A.", "595": "FINCO CAPITAL S.A.", "432": "FIRST CAPITAL MARKETS S.A.", "714": "FIVE CORPORATION S.A.", "813": "FIWIND CAPITAL S.A.", "597": "FUTURO BURSATIL S.A.", "773": "FUTUROS Y OPCIONES.COM S.A.", "795": "GALICIA SECURITIES S.A.U.", "865": "GLOBAL MARKET S.B. S.A.", "512": "GLOBAL VALORES S.A.", "704": "GMA CAPITAL S.A.", "769": "GMC VALORES S.A.", "758": "GOROSTIAGA BURSATIL S.A.", "446": "GRASSI S.A.", "742": "GRUPO DEL PLATA S.A.", "9": "GUARNIERI VALORES S.A.", "009": "GUARNIERI VALORES S.A.", "456": "GUOR INVESTMENTS S.A.", "765": "HOSS S.A.", "513": "INCAPITAL S.A.", "465": "INDUSTRIA CIA. BURSATIL S.A.", "539": "INDUSTRIAL VALORES S.A.", "430": "INTAGRO S.A.", "460": "INTEGRAR S.A.", "541": "INTERVALORES GROUP S.A.", "834": "INVERFIN S.A.", "806": "INVERSIONES CUYANAS S.A.", "435": "INVERSTART S.A.", "546": "INVERTIR EN BOLSA S.A.", "47": "INVERTIR ONLINE S.A.U.", "047": "INVERTIR ONLINE S.A.U.", "718": "INVESTMENT MANAGERS S.A.", "767": "INVIU S.A.U.", "23": "LAGUNA S.B. S.A.", "023": "LAGUNA S.B. S.A.", "821": "LANIN CAPITAL S.A", "520": "LATIN SECURITIES S.A.", "43": "LBO S.A.", "043": "LBO S.A.", "701": "LEIVA HERMANOS S.A.", "819": "LES CINQ CAPITAL S.A.", "624": "LISTRO VALORES S.A.", "570": "LONGO ELIA BURSATIL S.A.", "39": "LOS TILOS BURSATIL S.A.", "039": "LOS TILOS BURSATIL S.A.", "724": "LYNX VALORES S.A.", "550": "MACRO AGRO S.A.U.", "791": "MACRO SECURITIES S.A.U.", "875": "MANTA CIA. INVERSORA S.B. S.A.", "515": "MAR DEL PLATA BURSATIL AG. DE LIQ. Y COMPENSACION S.A.", "809": "MARIVA BURSATIL S.A.", "529": "MAX CAPITAL S.A.", "440": "MAXINTA VALORES S.A.", "555": "MEDITERRANEA VALORES y ACCIONES S.A.", "802": "META INVERSIONES S.A.", "774": "METROCORP VALORES S.A.", "852": "MG ALFA S.A.", "864": "MILLS CAPITAL MARKETS S.A.", "433": "MOMENTUM CAPITAL INVESTMENT S.A.", "534": "MULTIPLO BURSATIL S.A.", "501": "NACION BURSATIL S.A.", "34": "NASINI S.A.", "034": "NASINI S.A.", "547": "NAVARRO VIOLA Y CIA. S.A.", "876": "NEIX S.A.", "450": "NEXO AGENTE DE LIQ.Y COMP. INTEGRAL S.A.", "7": "NGA INVERSIONES S.A.", "007": "NGA INVERSIONES S.A.", "840": "NH CAPITAL S.A.", "804": "NIX VALORES S.A.", "66": "NUEVO BANCO DE SANTA FE S.A.", "066": "NUEVO BANCO DE SANTA FE S.A.", "558": "NUEVO CHACO BURSATIL S.A.", "560": "OMEGA BURSATIL S.A.", "756": "ONE618 FINANCIAL SERVICES S.A.U.", "15": "OPTION SECURITIES S.A.", "015": "OPTION SECURITIES S.A.", "711": "ORION CAPITAL S.A.", "417": "PALM INVERSIONES S.A.", "439": "PARAKEET CAPITAL S.A.", "757": "PATAGONIA VALORES S.A.", "727": "PETRINI VALORES S.A.", "551": "PGA VALORES S.A.", "792": "PHAROS CAPITAL S.A.", "442": "PORTFOLIO INVESTMENT S.A.", "598": "PP INVERSIONES S.A.", "521": "PROFICIO INVESTMENT S.A.", "549": "PROSECURITIES S.A.", "536": "PROVINCIA BURSATIL S.A.", "599": "PSA LA CALIFORNIA S.A.", "532": "PUENTE HNOS. S.A.", "405": "PUERTOS S.R.L.", "407": "QUILMES BURSATIL S.A.", "751": "QUINTA CAPITAL S.A.", "438": "RAVA BURSATIL S.A.", "423": "REAL MARKET S.A.", "684": "REBA CIA FINANCIERA S.A.", "839": "REGIONAL INVESTMENT CONSULTING S.A.", "808": "REM BURSATIL S.A.", "810": "REY LEYES VALORES S.A.", "543": "RIG VALORES S.A.", "528": "ROAGRO S.A.", "20": "ROSENTAL S.A.", "020": "ROSENTAL S.A.", "754": "S&C INVERSIONES S.A.", "556": "SAILING S.A.", "812": "SAN CRISTOBAL SERVICIOS FINANCIEROS S.A.", "507": "SBS TRADING S.A.", "106": "SBT VALORES S.A.", "502": "SCHWEBER SECURITIES S.A.", "975": "SD_ABIERTO MOMENTUM PYMES FCI", "629": "SD_ADCAP ABIERTO PYMES FCI", "170": "SD_ADCAP AH PESOS F DINERO FCI", "894": "SD_ADCAP AH.DIN.FDO.DINERO FCI", "586": "SD_ADCAP BALAN. 15 FCI", "171": "SD_ADCAP BALAN. 2 FCI", "893": "SD_ADCAP BALAN. 3 FCI", "462": "SD_ADCAP BALAN. 5 FCI", "78": "SD_ADCAP BALAN. 6 FCI", "078": "SD_ADCAP BALAN. 6 FCI", "77": "SD_ADCAP BALAN. 7 FCI", "077": "SD_ADCAP BALAN. 7 FCI", "82": "SD_ADCAP BALAN. 9 FCI", "082": "SD_ADCAP BALAN. 9 FCI", "726": "SD_ADCAP BALAN.10 FCI", "285": "SD_ADCAP BALAN.17 FCI", "68": "SD_ADCAP BALAN.20 FCI", "068": "SD_ADCAP BALAN.20 FCI", "27": "SD_ADCAP DESARROLLO E INFRAESTRUCT FCI", "027": "SD_ADCAP DESARROLLO E INFRAESTRUCT FCI", "3493": "SD_ADCAP FINANCIAMIENTO 1 FCI", "3427": "SD_ADCAP GESTION ESTRAT. II FCI", "672": "SD_ADCAP PESOS PLUS FCI", "680": "SD_ADCAP R.F. ARG FCI", "103": "SD_ADCAP RENTA DOLAR FCI", "467": "SD_ADCAP S&C RENTA CORPORATIVA FCI", "719": "SD_ADCAP WISE CAP GROWTH FCI", "741": "SD_ADCAP WISE CAPITAL HEDGE FCI", "53": "SD_ADCAP WISE CAPITAL MULTISTRATEGY FCI", "053": "SD_ADCAP WISE CAPITAL MULTISTRATEGY FCI", "239": "SD_ALAMERICA A.P. FCI", "293": "SD_ALAMERICA RENTA FIJA FCI", "320": "SD_ALIANZA DE CAPITALES FCI", "797": "SD_ALLARIA ABIERTO PYMES FCI", "102": "SD_ALLARIA AHORRO PLUS FCI", "132": "SD_ALLARIA CAPITAL FCI", "242": "SD_ALLARIA COB.DINAM. FCI", "489": "SD_ALLARIA CRECIMIENTO FCI", "470": "SD_ALLARIA DIN.2 FCI", "471": "SD_ALLARIA DIN.3 FCI", "472": "SD_ALLARIA DIN.4 FCI", "542": "SD_ALLARIA DINAMICO FCI", "977": "SD_ALLARIA DIVERSIFICADO FCI", "284": "SD_ALLARIA DOLAR CRECIMIENTO FCI", "75": "SD_ALLARIA DOLAR DIN.2 FCI", "075": "SD_ALLARIA DOLAR DIN.2 FCI", "621": "SD_ALLARIA DOLAR DINAMICO FCI", "983": "SD_ALLARIA DOLAR ESTRATEGICO FCI", "3418": "SD_ALLARIA DOLAR GESTION FCI", "3435": "SD_ALLARIA DOLAR RETORNO TOTAL FCI", "250": "SD_ALLARIA ESTRATEGICO FCI", "351": "SD_ALLARIA ESTRUCTURADO FCI", "3486": "SD_ALLARIA GESTION 5 FCI", "232": "SD_ALLARIA GESTION FCI", "244": "SD_ALLARIA PATR. FCI", "241": "SD_ALLARIA PATR.2 FCI", "234": "SD_ALLARIA PATR.3 FCI", "243": "SD_ALLARIA PATR.4 FCI", "484": "SD_ALLARIA PATR.5 FCI", "240": "SD_ALLARIA PRINCIPAL FCI", "235": "SD_ALLARIA PYME SELECTION FCI", "297": "SD_ALLARIA R.BALANCEADA I FCI", "290": "SD_ALLARIA RENTA MIXTA 2 FCI", "236": "SD_ALLARIA RENTA MIXTA FCI", "245": "SD_ALLARIA RTA BALANC II FCI", "715": "SD_ALYCBUR A.P. FCI", "678": "SD_ALYCBUR RENTA COBERTURA FCI", "3543": "SD_APOLO DOLARES FCI", "580": "SD_APOLO PYMES FCI", "578": "SD_ARGENFUNDS A.P.FCI", "3578": "SD_ARGENFUNDS AB. PY. FCI", "3428": "SD_ARGENFUNDS AB. PY. II FCI", "498": "SD_ARGENFUNDS AH.PESOS FCI", "606": "SD_ARGENFUNDS R.GLOBAL FCI", "577": "SD_ARGENFUNDS R.TOTAL FCI", "380": "SD_ARGENFUNDS RENTA DINAMICA FCI", "3083": "SD_ARGENFUNDS RENTA FIJA FCI", "583": "SD_AVANTIA MULTIESTRATEGIA FCI", "113": "SD_AXIS ABIERTO PYMES 1 FCI", "97": "SD_AXIS ABIERTO PYMES 2 FCI", "097": "SD_AXIS ABIERTO PYMES 2 FCI", "3422": "SD_AXIS ABIERTO PYMES 3 FCI", "745": "SD_AXIS CAPITAL I FCI", "688": "SD_AXIS ESTRAT. DOLAR 1 FCI", "280": "SD_AXIS ESTRAT. DOLAR 2 FCI", "295": "SD_AXIS ESTRAT. DOLAR 3 FCI", "281": "SD_AXIS ESTRAT. DOLAR 4 FCI", "3522": "SD_AXIS ESTRAT. DOLAR 5 FCI", "3523": "SD_AXIS ESTRAT. DOLAR 6 FCI", "738": "SD_AXIS ESTRAT.1 FCI", "896": "SD_AXIS ESTRAT.10 FCI", "699": "SD_AXIS ESTRAT.11 FCI", "997": "SD_AXIS ESTRAT.12 FCI", "79": "SD_AXIS ESTRAT.13 FCI", "079": "SD_AXIS ESTRAT.13 FCI", "70": "SD_AXIS ESTRAT.14 FCI", "070": "SD_AXIS ESTRAT.14 FCI", "694": "SD_AXIS ESTRAT.15 FCI", "31": "SD_AXIS ESTRAT.16 FCI", "031": "SD_AXIS ESTRAT.16 FCI", "56": "SD_AXIS ESTRAT.17 FCI", "056": "SD_AXIS ESTRAT.17 FCI", "74": "SD_AXIS ESTRAT.18 FCI", "074": "SD_AXIS ESTRAT.18 FCI", "33": "SD_AXIS ESTRAT.19 FCI", "033": "SD_AXIS ESTRAT.19 FCI", "26": "SD_AXIS ESTRAT.20 FCI", "026": "SD_AXIS ESTRAT.20 FCI", "3401": "SD_AXIS ESTRAT.21 FCI", "111": "SD_AXIS ESTRAT.22 FCI", "3436": "SD_AXIS ESTRAT.23 FCI", "404": "SD_AXIS ESTRAT.24 FCI", "455": "SD_AXIS ESTRAT.25 FCI", "443": "SD_AXIS ESTRAT.26 FCI", "457": "SD_AXIS ESTRAT.27 FCI", "318": "SD_AXIS ESTRAT.3 FCI", "3424": "SD_AXIS ESTRAT.30 FCI", "3343": "SD_AXIS ESTRAT.31 FCI", "263": "SD_AXIS ESTRAT.5 FCI", "319": "SD_AXIS ESTRAT.6 FCI", "883": "SD_AXIS ESTRAT.8 FCI", "3352": "SD_AXIS GESTION 1 FCI", "3537": "SD_AXIS GESTION 2 FCI", "730": "SD_AXIS IMSA AB. PYMES FEDERAL FCI", "686": "SD_AXIS PESOS FCI", "737": "SD_AXIS ROSENTAL ABIERTO PYMES FCI", "142": "SD_BALANZ ACCIONES FCI", "274": "SD_BALANZ AHORRO DOLARES FCI", "801": "SD_BALANZ CAP.AHORRO FCI", "105": "SD_BALANZ CAP.ESTRATEGIA I USD FCI", "144": "SD_BALANZ CAP.MONEY MARKET FCI", "673": "SD_BALANZ CAP.R.F. EN DOLARES FCI", "149": "SD_BALANZ CAP.RENTA FIJA FCI", "880": "SD_BALANZ CAPITAL ABIERTO PYMES FCI", "145": "SD_BALANZ EXCALIBUR RESOURCES FCI", "146": "SD_BALANZ GESTION FCI", "151": "SD_BALANZ INFRAESTRUCTURA FCI", "150": "SD_BALANZ INSTITUCIONAL FCI", "104": "SD_BALANZ MONEY MARKET USD FCI", "147": "SD_BALANZ OPPORTUNITY FCI", "141": "SD_BALANZ PERF.1 FCI", "198": "SD_BALANZ PERF.2 FCI", "488": "SD_BALANZ PERF.3 FCI", "183": "SD_BALANZ PERF.4 FCI", "200": "SD_BALANZ PERF.5 FCI", "40": "SD_BALANZ PERF.6 FCI", "040": "SD_BALANZ PERF.6 FCI", "238": "SD_BALANZ PERFORMANCE 10 FCI", "3423": "SD_BALANZ PERFORMANCE VII FCI", "233": "SD_BALANZ PERFORMANCE XI FCI", "3527": "SD_BALANZ PERFORMANCE XIII FCI", "3417": "SD_BALANZ PERFORMANCE XIV FCI", "143": "SD_BALANZ R.F. ESTRATEGICA FCI", "152": "SD_BALANZ RETORNO TOTAL FCI", "700": "SD_BAVSA ABIERTO PYMES FCI", "112": "SD_BAVSA AHORRO DOLAR FCI", "13": "SD_BAVSA AHORRO FCI", "013": "SD_BAVSA AHORRO FCI", "3528": "SD_BAVSA GLOBAL III FCI", "887": "SD_BAVSA PESOS PLUS FCI", "3492": "SD_BAVSA RENTA BALANCEADO 3 FCI", "3465": "SD_BAVSA RENTA BALANCEADO DOLARES FCI", "3525": "SD_BAVSA RENTA BALANCEADO DOLARES II FCI", "3446": "SD_BAVSA RENTA BALANCEADO FCI", "3464": "SD_BAVSA RENTA BALANCEADO II FCI", "3517": "SD_BAVSA RENTA BALANCEADO V FCI", "615": "SD_BAVSA RENTA DOLARES FCI", "349": "SD_BM ACTIVE R.F.ARG FCI", "3415": "SD_BPF R.F. PESOS FCI", "256": "SD_BPF R.F.DOLAR FCI", "3503": "SD_BULL MARKET ABIERTO PYMES FCI", "989": "SD_BULL MARKET AHORRO DOLARES FCI", "3287": "SD_BULL MARKET AHORRO PESOS FCI", "3511": "SD_BULL MARKET ESTRATEGIA FCI", "3509": "SD_BULL MARKET R.F. PLUS FCI", "3521": "SD_BULL MARKET RENTA FIJA DOLAR FCI", "129": "SD_BULL MARKET RENTA FIJA FCI", "748": "SD_CHAMPAQUI ABIERTO PYMES FCI", "689": "SD_CHAMPAQUI AHORRO MIXTO FCI", "322": "SD_CHAMPAQUI AHORRO PESOS FCI", "324": "SD_CHAMPAQUI COBERTURA FCI", "298": "SD_CHAMPAQUI ESTRAT.FCI", "325": "SD_CHAMPAQUI FDO.INM.PLUS FCI", "355": "SD_CHAMPAQUI FONDO INMEDIATO FCI", "985": "SD_CHAMPAQUI FONDO LIQUIDEZ DOLAR FCI", "69": "SD_CHAMPAQUI R.DOLAR FCI", "069": "SD_CHAMPAQUI R.DOLAR FCI", "693": "SD_CHAMPAQUI R.FUTURA FCI", "4": "SD_CHAMPAQUI RENTA VARIABLE FCI", "004": "SD_CHAMPAQUI RENTA VARIABLE FCI", "229": "SD_CIMA ABIERTO PYMES FCI", "398": "SD_CIMA R.F. NACIONAL FCI", "202": "SD_CMA ABIERTO PYMES FCI", "3514": "SD_CMA DOLAR DINAMICO FCI", "3439": "SD_CMA ESTRATEGIA PESOS FCI", "326": "SD_CMA PERFORMANCE FCI", "618": "SD_CMA PROTECCION FCI", "108": "SD_CMA RENTA DOLAR FCI", "89": "SD_COCOS AHORRO DOLARES FCI", "089": "SD_COCOS AHORRO DOLARES FCI", "579": "SD_COCOS AHORRO FCI", "138": "SD_COCOS RENDIMIENTO FCI", "3512": "SD_COCOS RETORNO TOTAL 2 FCI", "994": "SD_COCOS RETORNO TOTAL 3 FCI", "153": "SD_COHEN PESOS FCI", "614": "SD_COHEN PYMES FCI", "255": "SD_COHEN R.F.DOLARES FCI", "616": "SD_COHEN R.FIJA.PLUS FCI", "272": "SD_COMP.BACS", "257": "SD_COMP.BANCO BST", "260": "SD_COMP.BANCO CMF", "383": "SD_COMP.BANCO COMAFI", "331": "SD_COMP.BANCO GALICIA", "385": "SD_COMP.BANCO ICBC", "374": "SD_COMP.BANCO INDUSTRIAL", "323": "SD_COMP.BANCO ITAU", "261": "SD_COMP.BANCO MACRO", "359": "SD_COMP.BANCO MARIVA", "378": "SD_COMP.BANCO PATAGONIA", "384": "SD_COMP.BANCO SANTANDER", "382": "SD_COMP.BANCO VALORES", "321": "SD_COMP.BANCOR", "258": "SD_COMP.BNA", "128": "SD_COMPASS ABIERTO PYMES FCI", "197": "SD_COMPASS AHORRO FCI", "340": "SD_COMPASS BEST IDEAS FCI", "333": "SD_COMPASS CRECIMIENTO 2 FCI", "341": "SD_COMPASS CRECIMIENTO FCI", "348": "SD_COMPASS LIQUIDEZ FCI", "140": "SD_COMPASS OPPORTUNITY FCI", "199": "SD_COMPASS R.F. 3 FCI", "335": "SD_COMPASS R.F.2 FCI", "337": "SD_COMPASS R.F.4 FCI", "3466": "SD_COMPASS R.M IV FCI", "296": "SD_COMPASS R.PLUS II FCI", "334": "SD_COMPASS RENTA FIJA FCI", "279": "SD_COMPASS RENTA FIJA V FCI", "3490": "SD_COMPASS RENTA MIXTA 5 FCI", "691": "SD_COMPASS RENTA MIXTA FCI", "3529": "SD_COMPASS RENTA MIXTA VI FCI", "336": "SD_COMPASS RENTA PLUS FCI", "3433": "SD_CONOSUR AHORRO FCI", "3434": "SD_CONOSUR FINANCIAMIENTO FCI", "3432": "SD_CONOSUR LIQUIDEZ FCI", "3426": "SD_CONOSUR R.F. CORPORATIVA FCI", "125": "SD_CONS'TTIO R.Y CAPITAL FCI", "796": "SD_CONSTTIO AB PYME FCI", "437": "SD_CONSTTIO AHORRO PLUS ARG. FCI", "309": "SD_CONSTTIO ARBITRAJE FCI", "392": "SD_CONSTTIO BALANCE FUND FCI", "317": "SD_CONSTTIO CRECIMIENTO FCI", "391": "SD_CONSTTIO DEUDA ARG FCI", "316": "SD_CONSTTIO ESTRATEGIA FCI", "394": "SD_CONSTTIO FDO COM.DINERO FCI", "731": "SD_CONSTTIO MILTIMERCADO 4 FCI", "393": "SD_CONSTTIO MULTIESTRATEGIA FCI", "313": "SD_CONSTTIO R.BALANC FCI", "395": "SD_CONSTTIO R.FIJA FCI", "396": "SD_CONSTTIO R.LOCAL FCI", "397": "SD_CONSTTIO R.NACIONAL FCI", "314": "SD_CONSTTIO R.VARIABLE FCI", "3810": "SD_CONSTTIO RENTA DOLARES FCI", "315": "SD_CONSTTIO RET. ABS. FCI", "291": "SD_CONSTTIO TACTICO FCI", "3531": "SD_CONSULTATIO ESTRATEGIA III FCI", "221": "SD_DELTA ACCIONES FCI", "459": "SD_DELTA AHORRO FCI", "666": "SD_DELTA AHORRO PLUS FCI", "228": "SD_DELTA CRECIM. INFRA. FCI", "100": "SD_DELTA DOLARES FCI", "357": "SD_DELTA EMP.ARG. ABIERTO PYMES FCI", "207": "SD_DELTA FEDERAL I FCI", "208": "SD_DELTA GESTION I FCI", "209": "SD_DELTA GESTION II FCI", "210": "SD_DELTA GESTION III FCI", "205": "SD_DELTA GESTION IV FCI", "220": "SD_DELTA GESTION IX FCI", "211": "SD_DELTA GESTION V FCI", "213": "SD_DELTA GESTION VI FCI", "216": "SD_DELTA GESTION VII FCI", "218": "SD_DELTA GESTION VIII FCI", "222": "SD_DELTA GESTION X FCI", "224": "SD_DELTA GESTION XI FCI", "225": "SD_DELTA GESTION XII FCI", "227": "SD_DELTA INTERNACIONAL FCI", "212": "SD_DELTA LATINOAMERICA FCI", "154": "SD_DELTA MONEDA FCI", "206": "SD_DELTA MULTIMERCADO I FCI", "223": "SD_DELTA MULTIMERCADO II FCI", "219": "SD_DELTA PATRIMONIO I FCI", "204": "SD_DELTA PERFORMANCE FCI", "155": "SD_DELTA PESOS FCI", "217": "SD_DELTA RECURSOS NAT. FCI", "214": "SD_DELTA RENTA DOLARES FCI", "670": "SD_DELTA RENTA DOLARES PLUS FCI", "671": "SD_DELTA RENTA FCI", "215": "SD_DELTA SELECT FCI", "338": "SD_DESARROLLO ARG 1 FCI", "339": "SD_DESARROLLO ARG 2 FCI", "3376": "SD_DESARROLLO ARG 3 FCI", "262": "SD_DRACMA ABIERTO PYMES FCI", "692": "SD_DRACMA BALANCEADO FCI", "984": "SD_DRACMA ESTRATEGIA DOLAR 1 FCI", "746": "SD_DRACMA ESTRATEGIA DOLAR FCI", "50": "SD_DRACMA FCIC INMOBILIARIO FCI", "050": "SD_DRACMA FCIC INMOBILIARIO FCI", "21": "SD_DRACMA MULTIESTRATEGIA FCI", "021": "SD_DRACMA MULTIESTRATEGIA FCI", "3473": "SD_DRACMA MULTIESTRATEGIA II FCI", "3532": "SD_DRACMA MULTIESTRATEGIA III FCI", "892": "SD_DRACMA RENTA AHORRO FCI", "886": "SD_ECOPYMES ABIERTO PYMES FCI", "350": "SD_FIMA ABIERTO PYME FCI", "890": "SD_FIMA AHORRO PESOS FCI", "891": "SD_FIMA AHORRO PLUS FCI", "990": "SD_FIMA SUSTENTABLE FCI", "120": "SD_FIRST CRECIMIENTO FCI", "133": "SD_FIRST R.M. 1 FCI", "681": "SD_FIRST R.M. 2 FCI", "660": "SD_FIRST R.M. 3 FCI", "662": "SD_FIRST R.M. 4 FCI", "485": "SD_FIRST R.M. 5 FCI", "682": "SD_FIRST R.M. 6 FCI", "663": "SD_FIRST R.M. 7 FCI", "273": "SD_FIRST R.M. 8 FCI", "661": "SD_FIRST R.PY. 2 FCI", "121": "SD_FIRST R.PY. AB.PYME FCI", "122": "SD_FIRST RTA.AGRO LEY 27260 FCI", "124": "SD_FIRST RTA.DOLARES FCI", "123": "SD_FIRST RTA.PESOS FCI", "646": "SD_FT SBS R.F. TOTAL FCI", "664": "SD_GAINVEST AHORRO FCI", "187": "SD_GAINVEST BAL. FCI", "189": "SD_GAINVEST BAL.2 FCI", "888": "SD_GAINVEST BAL.3 FCI", "667": "SD_GAINVEST BAL.4 FCI", "683": "SD_GAINVEST BAL.5 FCI", "695": "SD_GAINVEST BAL.6 FCI", "76": "SD_GAINVEST BAL.7 FCI", "076": "SD_GAINVEST BAL.7 FCI", "986": "SD_GAINVEST BAL.8 FCI", "589": "SD_GAINVEST CAP. FCI", "188": "SD_GAINVEST CAP.2 FCI", "657": "SD_GAINVEST CAP.3 FCI", "613": "SD_GAINVEST CRE. FCI", "658": "SD_GAINVEST CRE.2 FCI", "590": "SD_GAINVEST CRE.3 FCI", "190": "SD_GAINVEST EST.1 FCI", "191": "SD_GAINVEST EST.2 FCI", "192": "SD_GAINVEST EST.3 FCI", "899": "SD_GAINVEST EST.4 FCI", "605": "SD_GAINVEST FF FCI", "94": "SD_GAINVEST GLO. 7 FCI", "094": "SD_GAINVEST GLO. 7 FCI", "193": "SD_GAINVEST GLO.2 FCI", "194": "SD_GAINVEST GLO.3 FCI", "310": "SD_GAINVEST GLO.4 FCI", "305": "SD_GAINVEST GLO.5 FCI", "186": "SD_GAINVEST INFRAESTRUC. FCI", "3304": "SD_GAINVEST PERFORMANCE FCI", "477": "SD_GAINVEST PESOS FCI", "588": "SD_GAINVEST PYMES FCI", "184": "SD_GAINVEST R.F. DOLARES FCI", "182": "SD_GAINVEST R.F. PLUS FCI", "476": "SD_GAINVEST R.F. PROTECC.PLUS FCI", "601": "SD_GAINVEST R.MIXTA FCI", "573": "SD_GAINVEST REGIONAL FCI", "377": "SD_GAINVEST RENTA FIJA FCI", "185": "SD_GAINVEST RENTA VARIABLE FCI", "499": "SD_GALILEO AB.PYMES FCI", "163": "SD_GALILEO ACCIONES FCI", "164": "SD_GALILEO AHORRO FCI", "575": "SD_GALILEO AHORRO PLUS FCI", "166": "SD_GALILEO ARGENTINA FCI", "165": "SD_GALILEO ESTRATEGIA FCI", "168": "SD_GALILEO MULTIMERCADO III FCI", "283": "SD_GALILEO MULTIMERCADO IV FCI", "3438": "SD_GALILEO MULTIMERCADO V FCI", "3441": "SD_GALILEO MULTIMERCADO VI FCI", "600": "SD_GALILEO MULTIMERCADO VII FCI", "3407": "SD_GALILEO MULTIMERCADO VIII FCI", "162": "SD_GALILEO PESOS FCI", "665": "SD_GALILEO PREMIUM FCI", "328": "SD_GALILEO R.F. FCI", "167": "SD_GALILEO RENTA FCI", "169": "SD_GALILEO SUSTENTABLE FCI", "747": "SD_GMC MONEY MARKET FCI", "265": "SD_GMC RETORNO TOTAL I FCI", "18": "SD_GMC RETORNO TOTAL II FCI", "018": "SD_GMC RETORNO TOTAL II FCI", "3539": "SD_GMC RETORNO TOTAL III FCI", "24": "SD_GOAL CAPITAL PLUS FCI", "024": "SD_GOAL CAPITAL PLUS FCI", "347": "SD_GOAL PERFORMANCE III FCI", "299": "SD_GSS I FCI", "300": "SD_GSS II FCI", "3416": "SD_HF BALANCEADO FCI", "3345": "SD_HF DESARROLLO AB. PYMES FCI", "3440": "SD_HF RETORNO TOTAL FCI", "740": "SD_IAM ABIERTO PYMES FCI", "127": "SD_IAM AHORRO PESOS FCI", "987": "SD_IAM DINAMICO FCI", "3479": "SD_IAM LIDER RENTA PESOS FCI", "996": "SD_IAM LIQUIDEZ EN DOLARES FCI", "270": "SD_IAM RENTA BALANCEADA FCI", "126": "SD_IAM RENTA CAPITAL FCI", "708": "SD_IAM RENTA CRECIMIENTO FCI", "733": "SD_IAM RENTA DOLARES FCI", "881": "SD_IAM RENTA MIXTA FCI", "327": "SD_IAM RENTA PLUS FCI", "172": "SD_IEB AHORRO FCI", "497": "SD_IEB AHORRO PLUS FCI", "3344": "SD_IEB CORTO PLAZO DOLAR FCI", "288": "SD_IEB ESTRATEGICO FCI", "3463": "SD_IEB ESTRATEGICO II FCI", "88": "SD_IEB ESTRUCTURADO 2 FCI", "088": "SD_IEB ESTRUCTURADO 2 FCI", "900": "SD_IEB ESTRUCTURADO 3 FCI", "3861": "SD_IEB ESTRUCTURADO 4 FCI", "898": "SD_IEB ESTRUCTURADO FCI", "3405": "SD_IEB MULTIESTRATEGIA 2 FCI", "59": "SD_IEB MULTIESTRATEGIA 3 FCI", "059": "SD_IEB MULTIESTRATEGIA 3 FCI", "775": "SD_IEB MULTIESTRATEGIA 4 FCI", "254": "SD_IEB MULTIESTRATEGIA 5 FCI", "181": "SD_IEB MULTIESTRATEGIA FCI", "749": "SD_IEB PYMES FCI", "604": "SD_IEB RENTA FIJA DOLAR 2 FCI", "494": "SD_IEB RENTA FIJA FCI", "3510": "SD_IEB RETORNO TOTAL 3 FCI", "496": "SD_IEB RETORNO TOTAL FCI", "603": "SD_INTEGRAE S&C RETORNO TOTAL FCI", "679": "SD_IOL DOLAR AHORRO PLUS FCI", "271": "SD_LOMBARD AB. PYMES FCI", "373": "SD_LOMBARD ABIERTO PLUS FCI", "753": "SD_LOMBARD ACCIONES LIDER FCI", "29": "SD_LOMBARD AHORRO FCI", "029": "SD_LOMBARD AHORRO FCI", "538": "SD_LOMBARD AHORRO PLUS FCI", "3451": "SD_LOMBARD AHORRO PLUS II FCI", "371": "SD_LOMBARD CAPITAL FCI", "3410": "SD_LOMBARD DINAMICO I FCI", "885": "SD_LOMBARD PESOS PLUS FCI", "372": "SD_LOMBARD RTA.FIJA FCI", "354": "SD_LOMBARD RTA.PESOS FCI", "759": "SD_MAF ABIERTO PYMES FCI", "364": "SD_MAF ACCIONES ARGENTINAS FCI", "363": "SD_MAF AHORRO FCI", "367": "SD_MAF AHORRO PESOS FCI", "366": "SD_MAF AHORRO PLUS FCI", "607": "SD_MAF EMPRESAS ABIERTO PYMES FCI", "3456": "SD_MAF ESTRATEGIA FCI", "369": "SD_MAF G.ACTIVA 2 FCI", "36": "SD_MAF G.ACTIVA 3 FCI", "036": "SD_MAF G.ACTIVA 3 FCI", "277": "SD_MAF G.ACTIVA FCI", "375": "SD_MAF LIQUIDEZ FCI", "292": "SD_MAF MIX II FCI", "368": "SD_MAF MONEY MARKET FCI", "361": "SD_MAF PESOS PLUS FCI", "365": "SD_MAF RENTA ARG FCI", "360": "SD_MAF RENTA FCI", "895": "SD_MAF RENTA FIJA COBERTURA FCI", "639": "SD_MAF RENTA MIXTA FCI", "370": "SD_MAF RTA.BAL. 2 FCI", "362": "SD_MAF RTA.BAL. FCI", "760": "SD_MAX ABIERTO PYMES FCI", "698": "SD_MAX AHORRO PESOS FCI", "342": "SD_MAX COBERTURA FCI", "8": "SD_MAX DINAMICO I FCI", "008": "SD_MAX DINAMICO I FCI", "3278": "SD_MAX DINAMICO II FCI", "38": "SD_MAX DINAMICO III FCI", "038": "SD_MAX DINAMICO III FCI", "276": "SD_MAX DINAMICO V FCI", "743": "SD_MAX ESTRATEGICO I FCI", "454": "SD_MAX ESTRATEGICO V FCI", "3264": "SD_MAX GESTION AB. PY. I FCI", "201": "SD_MAX MONEY MARKET FCI", "3483": "SD_MAX MULTIGESTION I FCI", "3445": "SD_MAX RENTA FIJA FCI", "3547": "SD_MAX RETORNO TOTAL PESOS II FCI", "156": "SD_MEGAINV LIQUIDEZ PESOS FCI", "562": "SD_MEGAINVER AH. FCI", "389": "SD_MEGAINVER AH.PLUS FCI", "390": "SD_MEGAINVER DIVERSIFICADO FCI", "564": "SD_MEGAINVER FINAN. PRODUCTIVO FCI", "251": "SD_MEGAINVER PERFORMANCE FCI", "388": "SD_MEGAINVER R.F.COBERTURA FCI", "247": "SD_MEGAINVER R.F.LATAM FCI", "386": "SD_MEGAINVER R.FIJA FCI", "419": "SD_MEGAINVER R.FLEXIBLE FCI", "387": "SD_MEGAINVER R.GLOBAL FCI", "563": "SD_MEGAINVER R.MIXTA FCI", "248": "SD_MEGAINVER R.VARIABLE FCI", "249": "SD_MEGAINVER RET. ABSOLUTO FCI", "252": "SD_MEGAINVER RET.TOTAL FCI", "500": "SD_MEGAINVER VALORES NEGOCIABLES FCI", "253": "SD_MEGANINVER CORP.DOLARES FCI", "266": "SD_MEGAQM AB. FINANC. INFRA. Y ECO. REAL FCI", "5": "SD_MEGAQM AHORRO FCI", "005": "SD_MEGAQM AHORRO FCI", "3450": "SD_MEGAQM BALANCEADO FCI", "73": "SD_MEGAQM COBERTURA FCI A.P.", "073": "SD_MEGAQM COBERTURA FCI A.P.", "3481": "SD_MEGAQM CORPORATIVO DOLARES FCI", "195": "SD_MEGAQM EMPRESAS ARG PYME FCI", "581": "SD_MEGAQM ESTRATEGIA 5 FCI", "582": "SD_MEGAQM ESTRATEGIA 6 FCI", "584": "SD_MEGAQM ESTRATEGIA 7 FCI", "3482": "SD_MEGAQM GESTION DOLARES 2 FCI", "3449": "SD_MEGAQM LIQUIDEZ DOLAR FCI", "196": "SD_MEGAQM PESOS FCI", "974": "SD_MEGAQM RENTA GLOBAL DOLARES FCI", "659": "SD_MEGAQM RETORNO ABS FCI", "779": "SD_MERCADO FONDO AHORRO FCI", "259": "SD_MERCADO FONDOS FCI", "178": "SD_NOVUS BALANCEADO FCI", "175": "SD_NOVUS ESTRATEGIA FCI", "643": "SD_NOVUS GESTION 2 FCI", "17": "SD_NOVUS GESTION FCI", "017": "SD_NOVUS GESTION FCI", "739": "SD_NOVUS INCOME FCI", "174": "SD_NOVUS LIQ. FCI", "173": "SD_NOVUS LIQ.PLUS FCI", "49": "SD_NOVUS MULTIESTRATEGIA FCI", "049": "SD_NOVUS MULTIESTRATEGIA FCI", "736": "SD_NOVUS PERFORMANCE FCI", "30": "SD_NOVUS PYME ABIERTO FCI", "030": "SD_NOVUS PYME ABIERTO FCI", "177": "SD_NOVUS RENTA BALANCEADO FCI", "732": "SD_NOVUS RENTA CAPITAL FCI", "91": "SD_NOVUS RENTA DOLAR FCI", "091": "SD_NOVUS RENTA DOLAR FCI", "93": "SD_NOVUS RENTA FIJA FCI", "093": "SD_NOVUS RENTA FIJA FCI", "3520": "SD_NOVUS RETORNO TOTAL FCI", "176": "SD_NOVUS VALOR FCI", "3444": "SD_NUMANCIA PESOS FCI", "3447": "SD_NUMANCIA PESOS II FCI", "3506": "SD_NUMANCIA PESOS III FCI", "3524": "SD_NUMANCIA PESOS IV FCI", "130": "SD_OPTIMUM ABIERTO PYMES FCI", "356": "SD_OPTIMUM CDB PESOS ULTRA FCI", "478": "SD_OPTIMUM LIQUIDITY FCI", "697": "SD_OPTIMUN GLOB.INV.GRADE FCI", "379": "SD_OPTIMUN RTA.FIJA ARGENTINA FCI", "381": "SD_OPTIMUN RTA.M. FLEXIBLE ARG. FCI", "286": "SD_PARAKEET ABIERTO PYMES FCI", "3460": "SD_PARAKEET BALANCE FUND FCI", "993": "SD_PARAKEET DINAMICO FCI", "3442": "SD_PARAKEET DINAMICO II FCI", "3534": "SD_PARAKEET GESTION ACTIVA FCI", "246": "SD_PARAKEET INCOME FCI", "3546": "SD_PARAKEET MULTIMERCADO II FCI", "3545": "SD_PARAKEET PREMIUM FCI", "617": "SD_PARAKEET RENTA PESOS FCI", "294": "SD_PIONERO MONEDA FCI", "518": "SD_PIONERO R.AHORRO FCI", "80": "SD_QUINQUELA AHORRO DOLARES FCI", "080": "SD_QUINQUELA AHORRO DOLARES FCI", "92": "SD_QUINQUELA CAPITAL FCI", "092": "SD_QUINQUELA CAPITAL FCI", "585": "SD_QUINQUELA R.MIXTA FCI", "458": "SD_QUIRON AGRO PYMES FCI", "790": "SD_QUIRON FIXED INCOME FCI", "332": "SD_QUIRON LATAM USD FCI", "330": "SD_QUIRON MONEY MARKET FCI", "491": "SD_QUIRON PYMES CAPITAL PLUS FCI", "131": "SD_QUIRON PYMES FCI", "3430": "SD_QUIRON RENTA MIXTA FCI", "744": "SD_QUIRON SAVINGS FCI", "303": "SD_ROFEX SA Garantia de Terceros", "469": "SD_SBS ACCIONES ARG FCI", "644": "SD_SBS AHORRO PESOS FCI", "533": "SD_SBS BALANCEADO FCI", "625": "SD_SBS CAPITAL PLUS FCI", "642": "SD_SBS DESARROLLO E INFRA FCI", "777": "SD_SBS ESTRATEGIA FCI", "641": "SD_SBS GESTION R.F. FCI", "992": "SD_SBS PATRIMONIO 3 FCI", "58": "SD_SBS PATRIMONIO 5 FCI", "058": "SD_SBS PATRIMONIO 5 FCI", "289": "SD_SBS PATRIMONIO 6 FCI", "626": "SD_SBS PATRIMONIO FCI", "645": "SD_SBS PATRIMONIO II FCI", "3541": "SD_SBS PATRIMONIO IX FCI", "637": "SD_SBS PESOS PLUS FCI", "535": "SD_SBS PYME FCI", "311": "SD_SBS R.F. I FCI", "632": "SD_SBS RENTA CAPITAL FCI", "630": "SD_SBS RENTA MIXTA FCI", "696": "SD_SBS RENTA PESOS FCI", "3536": "SD_SBS RETORNO TOTAL FCI", "3507": "SD_SBS TAVELLI GLOBAL FCI", "991": "SD_SC I RENTA MIXTA FCI", "302": "SD_SC II RENTA FIJA FCI", "301": "SD_SCHRODER ARG FCI", "119": "SD_SCHRODER BALANCEADO FCI", "148": "SD_SCHRODER CORTO PLAZO FCI", "557": "SD_SCHRODER DESARROLLO Y CREC FCI", "139": "SD_SCHRODER INFRA FCI", "84": "SD_SCHRODER LIQUIDEZ FCI", "084": "SD_SCHRODER LIQUIDEZ FCI", "157": "SD_SCHRODER MULTIACTIVOS FCI", "35": "SD_SCHRODER PATRIMONIO 2 FCI", "035": "SD_SCHRODER PATRIMONIO 2 FCI", "158": "SD_SCHRODER PESOS FCI", "160": "SD_SCHRODER R.G. FCI", "159": "SD_SCHRODER R.G.4 FCI", "307": "SD_SCHRODER R.G.5 FCI", "308": "SD_SCHRODER R.PERFORMANCE FCI", "161": "SD_SCHRODER R.PLUS FCI", "3501": "SD_SCHRODER RENTA FIJA FCI", "675": "SD_SMSV RENTA EN PESOS FCI", "676": "SD_SOUTHERN ABIERTO PYME FCI", "674": "SD_SOUTHERN GLOBAL FCI", "468": "SD_SOUTHERN TRUST ESTRAT. FCI", "116": "SD_SOUTHERN TRUST GESTION 4 FCI", "988": "SD_SOUTHERN TRUST GESTION 5 FCI", "306": "SD_SOUTHERN TRUST GESTION 6 FCI", "22": "SD_SOUTHERN TRUST GESTION 7 FCI", "022": "SD_SOUTHERN TRUST GESTION 7 FCI", "179": "SD_SOUTHERN TRUST GESTION I FCI", "329": "SD_SOUTHERN TRUST R.PESOS FCI", "677": "SD_SOUTHERN TRUST R.PLUS FCI", "180": "SD_SOUTHERN TRUST ZERO FCI", "86": "SD_ST INFRAESTRUCTURA FCI", "086": "SD_ST INFRAESTRUCTURA FCI", "3513": "SD_TANDEM DOLARES RETORNO TOTAL FCI", "3540": "SD_TANDEM GLOBAL FCI", "136": "SD_TANDEM PESOS AHORRO PLUS FCI", "230": "SD_TAVELLI A.P. FCI", "889": "SD_TORONTO TR. BALANCEADO FCI", "453": "SD_TORONTO TR. INFRAESTRUCTURA FCI", "12": "SD_TORONTO TR. RENTA DOLAR FCI", "012": "SD_TORONTO TR. RENTA DOLAR FCI", "612": "SD_TORONTO TR.ABIERTO PYMES FCI", "358": "SD_TORONTO TR.AHORRO FCI", "608": "SD_TORONTO TR.FCI", "203": "SD_TORONTO TR.GESTION FCI", "505": "SD_TORONTO TR.GLOBAL CAP FCI", "609": "SD_TORONTO TR.RENTA FIJA FCI", "519": "SD_TORONTO TR.RETORNO TOTAL FCI", "610": "SD_TORONTO TR.RTA.FIJA PLUS FCI", "611": "SD_TORONTO TR.SPECIAL OP. FCI", "569": "ZOFINGEN SECURITIES S.A.", "770": "VETA CAPITAL S.A.", "587": "SECURITIES CAF ARGENTINA S.A.", "553": "ST SECURITIES S.A.U.", "42": "STOCKBROKERS S.A.", "042": "STOCKBROKERS S.A.", "506": "STONEX SECURITIES S.A.", "11": "TARALLO S.A.", "011": "TARALLO S.A.", "25": "TRANSATLANTICA BURSATIL S.A.", "025": "TRANSATLANTICA BURSATIL S.A.", "525": "VALIANT BURSATIL S.A.U.", "868": "WETPAMPEAN HDRR S.A.", "866": "WISE CAPITAL SECURITIES S.A.", "554": "ZONA BURSATIL S.A."};
 
 // ── ESTADO ──────────────────────────────────────────────────────────────
-let S = { seg:'all', pyme:null, instr:'all', monedas:new Set(), resps:new Set(), view:'resumen', fechas:new Set() };
+let S = { seg:'all', pyme:null, instr:'all', monedas:new Set(), resps:new Set(), fechas:new Set() };
 let _tableSort={col:null,dir:'asc'};
 let EVO_RESPS = new Set();
 let EVO_FECHAS = new Set();
@@ -15411,17 +15365,6 @@ const SEG_C={'No Garantizado':'#1A5995','Garantizado':'#1C1D5A','Avalado':'#0075
 const SEG_PILL={'No Garantizado':'ng','Garantizado':'gar','Avalado':'av'};
 const SEGS=['No Garantizado','Garantizado','Avalado'];
 
-function mkChart(id,type,data,opts){
-  const fullOpts={responsive:true,maintainAspectRatio:false,animation:false,
-    plugins:{legend:{display:false},tooltip:{}},...opts};
-  if(CHARTS[id]){
-    CHARTS[id].data=data;
-    CHARTS[id].options=fullOpts;
-    CHARTS[id].update('none');
-    return;
-  }
-  CHARTS[id]=new Chart(document.getElementById(id).getContext('2d'),{type,data,options:fullOpts});
-}
 const getHora=r=>{if(!r.hora||r.hora==='—')return null;const m=r.hora.match(/^(\d{2})/);return m?m[1]+':00':null};
 
 // ── INIT ──────────────────────────────────────────────────────────────────
@@ -15563,17 +15506,17 @@ function filterEvoMsList(){
 function toggleEvoResp(val){
   EVO_RESPS.has(val)?EVO_RESPS.delete(val):EVO_RESPS.add(val);
   updateEvoRespTrigger();
-  if(S.view==='evolucion') renderEvolucion(getEvoData());
+  renderEvolucion(getEvoData());
 }
 function selectAllEvoResp(){
   ALL_EVO_RESPS.forEach(r=>EVO_RESPS.add(r));
   renderMsList('evoRespList',ALL_EVO_RESPS,EVO_RESPS,toggleEvoResp,document.getElementById('evoRespSearch').value);
-  updateEvoRespTrigger(); if(S.view==='evolucion') renderEvolucion(getEvoData());
+  updateEvoRespTrigger(); renderEvolucion(getEvoData());
 }
 function clearEvoResp(){
   EVO_RESPS.clear();
   renderMsList('evoRespList',ALL_EVO_RESPS,EVO_RESPS,toggleEvoResp,document.getElementById('evoRespSearch').value);
-  updateEvoRespTrigger(); if(S.view==='evolucion') renderEvolucion(getEvoData());
+  updateEvoRespTrigger(); renderEvolucion(getEvoData());
 }
 function updateEvoRespTrigger(){
   const n=EVO_RESPS.size;
@@ -15810,7 +15753,7 @@ function togglePyme(val){
   applyFilters();
 }
 function resetFilters(){
-  S={seg:'all',pyme:null,instr:'all',monedas:new Set(),resps:new Set(),view:S.view,fechas:new Set()};
+  S={seg:'all',pyme:null,instr:'all',monedas:new Set(),resps:new Set(),fechas:new Set()};
   _tableSort={col:null,dir:'asc'}; _updateSortHeaders();
   EVO_FECHAS=new Set();  EVO_INSTR='all'; EVO_MONEDAS=new Set();
   document.querySelectorAll('#segBtns .tbtn').forEach(b=>b.className='tbtn');
@@ -15828,26 +15771,13 @@ function resetFilters(){
   applyFilters();
 }
 
-// ── VISTA ─────────────────────────────────────────────────────────────────
-function setView(v){
-  S.view=v;
-  document.getElementById('vt-resumen').classList.toggle('active',v==='resumen');
-  document.getElementById('vt-evolucion').classList.toggle('active',v==='evolucion');
-  document.getElementById('panel-resumen').classList.toggle('hidden',v!=='resumen');
-  document.getElementById('panel-evolucion').classList.toggle('hidden',v!=='evolucion');
-  // Fila 2 solo visible en Resumen
-  document.getElementById('tbRow2').style.display = v==='resumen' ? '' : 'none';
-  applyFilters();
-}
-
 // ── RENDER ────────────────────────────────────────────────────────────────
 function applyFilters(){
   const data=getFiltered();
   _tableShowAll=false;
-  document.getElementById('resBadge').textContent=data.length+' ops';
   renderKPIs(data);
-  if(S.view==='resumen'){renderResumen(data);renderTable(data);}
-  else renderEvolucion(getEvoData());
+  renderEvolucion(getEvoData());
+  renderTable(data);
 }
 
 function renderKPIs(data){
@@ -15860,66 +15790,9 @@ function renderKPIs(data){
   const tasaProm=wavgTasa(data);
   document.getElementById('kVol').textContent=fmtM(volArs);
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
-  document.getElementById('kInst').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kTasa').textContent=tasaProm!=null?tasaProm.toFixed(1)+'%':'—';
   document.getElementById('kPlazo').textContent=plazoCnt?Math.round(plazoSum/plazoCnt)+'d':'—';
   document.getElementById('kPyme').textContent=data.length?Math.round(pymeCnt/data.length*100)+'%':'—';
-}
-
-function renderResumen(data){
-  // Segmentos presentes en los datos filtrados (no mostrar vacíos)
-  const segsActivos = SEGS.filter(s=>data.some(r=>r.segmento===s));
-  const segsLabels  = segsActivos.length ? segsActivos : SEGS;
-
-  // ── Gráfico 1: Volumen por segmento ──
-  mkChart('cVol','bar',{
-    labels: segsLabels,
-    datasets:[{
-      data: segsLabels.map(s=>data.filter(r=>r.segmento===s).reduce((a,r)=>a+(r.monto||0),0)),
-      backgroundColor: segsLabels.map(s=>SEG_C[s]+'CC'),
-      borderColor:     segsLabels.map(s=>SEG_C[s]),
-      borderWidth:1.5, borderRadius:6
-    }]
-  },{
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtM(ctx.raw)}}},
-    scales:{
-      x:{grid:{display:false},ticks:{color:'#8A9BBB',font:{size:10}}},
-      y:{grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>fmtM(v)}}
-    }
-  });
-
-  // ── Gráfico 2: Tasa promedio + plazo promedio por segmento (scatter) ──
-  const tasasData = segsLabels.map(s=>{
-    const ops = data.filter(r=>r.segmento===s&&r.tasa!=null&&r.plazo!=null);
-    const tasaW = wavgTasa(ops);
-    if(!ops.length||tasaW==null) return null;
-    return {
-      tasa:  parseFloat(tasaW.toFixed(2)),
-      plazo: parseFloat(avg(ops.map(r=>r.plazo)).toFixed(1)),
-      seg:   s
-    };
-  }).filter(Boolean);
-
-  const cTasasData={datasets:tasasData.map(d=>({
-    label:d.seg,
-    data:[{x:d.plazo,y:d.tasa,r:6}],
-    backgroundColor:SEG_C[d.seg]+'88',
-    borderColor:SEG_C[d.seg]+'BB',
-    borderWidth:1,
-  }))};
-  const cTasasOpts={responsive:true,maintainAspectRatio:false,animation:false,
-    plugins:{
-      legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-      tooltip:{callbacks:{label:ctx=>{const d=ctx.dataset.label;return ` ${d} — Tasa: ${ctx.parsed.y.toFixed(1)}%  |  Plazo prom: ${ctx.parsed.x.toFixed(0)} días`;}}}
-    },
-    scales:{
-      x:{title:{display:true,text:'Plazo promedio (días)',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9}}},
-      y:{title:{display:true,text:'Tasa TNA %',color:'#8A9BBB',font:{size:9}},grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:10},callback:v=>v+'%'}}
-    }
-  };
-  if(CHARTS['cTasas']){CHARTS['cTasas'].data=cTasasData;CHARTS['cTasas'].options=cTasasOpts;CHARTS['cTasas'].update('none');}
-  else{CHARTS['cTasas']=new Chart(document.getElementById('cTasas').getContext('2d'),{type:'bubble',data:cTasasData,options:cTasasOpts});}
-
 }
 
 const TABLE_PAGE=300;
@@ -16030,28 +15903,6 @@ function renderEvolucion(data){
     }));
     _updateEvoVolChart({labels:rLabels,datasets});
   }
-
-  // ── Gráfico 2: Volumen por instrumento por rango de plazo ──
-  const instrs=['ECHEQ','PAGARE','FCE','CPD','PAGARE AJUSTE TAMAR'];
-  const iclrs=['#1C1D5ABB','#1A5995BB','#0075AABB','#005F8ABB','#8AAFD4BB'];
-  const instrsActivos = instrs.filter(ins=>data.some(r=>r.instrumento===ins&&r.plazo!=null));
-
-  const cEvoInstrData={labels:rLabels,datasets:instrsActivos.map(ins=>({
-    label:ins,
-    data:RANGOS.map(rng=>data.filter(r=>r.instrumento===ins&&r.plazo!=null&&r.plazo>=rng.min&&r.plazo<=rng.max)
-                            .reduce((a,r)=>a+(r.monto||0),0)),
-    backgroundColor:iclrs[instrs.indexOf(ins)],borderRadius:3
-  }))};
-  const cEvoInstrOpts={responsive:true,maintainAspectRatio:false,animation:false,
-    plugins:{legend:{display:true,position:'bottom',labels:{color:'#8A9BBB',font:{size:9},boxWidth:9}},
-      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmtM(ctx.raw)}`}}},
-    scales:{
-      x:{stacked:true,grid:{display:false},ticks:{color:'#8A9BBB',font:{size:9}}},
-      y:{stacked:true,grid:{color:'#F0F2F5'},ticks:{color:'#8A9BBB',font:{size:9},callback:v=>v>0?fmtM(v):''}}
-    }
-  };
-  if(CHARTS['cEvoInstr']){CHARTS['cEvoInstr'].data=cEvoInstrData;CHARTS['cEvoInstr'].options=cEvoInstrOpts;CHARTS['cEvoInstr'].update('none');}
-  else{CHARTS['cEvoInstr']=new Chart(document.getElementById('cEvoInstr').getContext('2d'),{type:'bar',data:cEvoInstrData,options:cEvoInstrOpts});}
 }
 
 // ── MULTISELECT MONEDA ────────────────────────────────────────────────────
