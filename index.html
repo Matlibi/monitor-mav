@@ -780,22 +780,24 @@ function plazoBucketIdx(p){
 const CREDIT_PALETTE = ['#2a78d6','#1baf7a','#eda100','#008300','#4a3aa7','#e34948','#e87ba4'];
 const AGG_COLOR = '#1A5995';
 const CV_ARS = new Set(['$']), CV_USD = new Set(['U$D','U$S']), CV_DOL = new Set(['DOL']);
+// color fijo por crédito/SGR (no por índice) — así el toggle PyME de No Garantizado,
+// que saca a Payway de la lista, no corre los colores de Cencosud/INC al achicarse el array
 const NG_CREDITOS = [
-  {name:'Tarjeta Naranja', resps:['TARJETA NARANJA S.A.U.']},
-  {name:'Telecom/Telefónica', resps:['TELEFONICA MOVILES ARGENTINA SOCIEDAD ANONIMA','TELECOM ARGENTINA SOCIEDAD ANONIMA']},
-  {name:'Payway', resps:['PAYWAY SAU']},
-  {name:'Cencosud', resps:['CENCOSUD S A']},
-  {name:'INC', resps:['INC S. A.']},
+  {name:'Tarjeta Naranja', color:CREDIT_PALETTE[0], resps:['TARJETA NARANJA S.A.U.']},
+  {name:'Telecom/Telefónica', color:CREDIT_PALETTE[1], resps:['TELEFONICA MOVILES ARGENTINA SOCIEDAD ANONIMA','TELECOM ARGENTINA SOCIEDAD ANONIMA']},
+  {name:'Payway', color:CREDIT_PALETTE[2], resps:['PAYWAY SAU']},
+  {name:'Cencosud', color:CREDIT_PALETTE[3], resps:['CENCOSUD S A']},
+  {name:'INC', color:CREDIT_PALETTE[4], resps:['INC S. A.']},
 ];
 // Payway no opera en condición PyME
 function ngCreditosFor(pyme){ return pyme ? NG_CREDITOS.filter(c=>c.name!=='Payway') : NG_CREDITOS; }
 const AV_SGR = [
-  {name:'Acindar', resps:['Acindar Pymes S.G.R.']},
-  {name:'Argenpyme', resps:['Argenpymes S.G.R.']},
-  {name:'Fintech', resps:['Fintech S.G.R.']},
-  {name:'Campo Aval', resps:['Campo Aval S.G.R.']},
-  {name:'Innova', resps:['INNOVA S.G.R.']},
-  {name:'Garantías Bind', resps:['Garantias Bind S.G.R.']},
+  {name:'Acindar', color:CREDIT_PALETTE[0], resps:['Acindar Pymes S.G.R.']},
+  {name:'Argenpyme', color:CREDIT_PALETTE[1], resps:['Argenpymes S.G.R.']},
+  {name:'Fintech', color:CREDIT_PALETTE[2], resps:['Fintech S.G.R.']},
+  {name:'Campo Aval', color:CREDIT_PALETTE[3], resps:['Campo Aval S.G.R.']},
+  {name:'Innova', color:CREDIT_PALETTE[4], resps:['INNOVA S.G.R.']},
+  {name:'Garantías Bind', color:CREDIT_PALETTE[5], resps:['Garantias Bind S.G.R.']},
 ];
 
 function ultimasFechasConOperaciones(n){
@@ -816,7 +818,7 @@ function cvPool(segmento, monedas, pymeVal){
 function cvSeries(pool, groups){
   const series=[], volumes=[];
   groups.forEach((g,ii)=>{
-    const color = groups.length===1 ? AGG_COLOR : CREDIT_PALETTE[ii % CREDIT_PALETTE.length];
+    const color = g.color || (groups.length===1 ? AGG_COLOR : CREDIT_PALETTE[ii % CREDIT_PALETTE.length]);
     const rows = g.resps ? pool.filter(r=>g.resps.includes(r.resp)) : pool;
     const values=[], vols=[];
     for(let b=0;b<PLAZOS.length;b++){
@@ -876,6 +878,16 @@ function cvComputeGeom(canvas, series, volumes){
   return {cssW,cssH,padL,padR,padT,padB,vMin,vMax,rFor,n,jitter,xAt,yAt};
 }
 
+// Paso "lindo" para el eje Y (1, 2, 5, 10 × potencia de 10) apuntando a ~maxTicks líneas
+function cvNiceStep(range, maxTicks){
+  if(!(range>0)) return 1;
+  const rough = range/maxTicks;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough/mag;
+  const step = norm<=1 ? 1 : norm<=2 ? 2 : norm<=5 ? 5 : 10;
+  return step*mag;
+}
+
 function cvDrawChart(canvas, series, volumes, opts){
   opts = opts||{};
   const hi = opts.highlightIndex ?? null;
@@ -896,12 +908,17 @@ function cvDrawChart(canvas, series, volumes, opts){
   ctx.strokeStyle = '#EEF1F6'; ctx.lineWidth = 1;
   ctx.fillStyle = '#93A0BB'; ctx.font = '9px Montserrat,-apple-system,Segoe UI,Arial';
   ctx.textAlign='right'; ctx.textBaseline='middle';
-  const ticks = 3;
-  for(let t=0;t<=ticks;t++){
-    const v = geo.vMin + (geo.vMax-geo.vMin)*t/ticks;
+  // Ticks en valores redondos (no fracciones arbitrarias de vMin/vMax): antes la línea se
+  // dibujaba en un valor real como 22.5% pero la etiqueta lo redondeaba a "22%" para mostrarlo,
+  // así que un punto en 22.3% quedaba visualmente por debajo de la línea rotulada "22%" aunque
+  // numéricamente estuviera por encima. En ARS el paso queda fijo en 1 punto porcentual.
+  const step = opts.tickStep || cvNiceStep(geo.vMax-geo.vMin, 6);
+  const decimals = step<1 ? 1 : 0;
+  const firstTick = Math.ceil(geo.vMin/step)*step;
+  for(let v=firstTick; v<=geo.vMax+1e-9; v+=step){
     const y = geo.yAt(v);
     ctx.beginPath(); ctx.moveTo(geo.padL,y); ctx.lineTo(geo.cssW-geo.padR,y); ctx.stroke();
-    ctx.fillText(v.toFixed(0)+'%', geo.padL-7, y);
+    ctx.fillText(v.toFixed(decimals)+'%', geo.padL-7, y);
   }
   ctx.textAlign='center'; ctx.textBaseline='top';
   PLAZOS.forEach((lbl,i)=>{
@@ -988,7 +1005,7 @@ function cvAttachHover(canvasId, group){
     current = highlightIndex;
     ids.forEach(id=>{
       const s = cvChartState[id];
-      if(s) cvDrawChart(document.getElementById(id), s.series, s.volumes, {highlightIndex});
+      if(s) cvDrawChart(document.getElementById(id), s.series, s.volumes, {highlightIndex, tickStep:s.tickStep});
     });
   };
   const handleMove = (clientX, clientY)=>{
@@ -1032,17 +1049,17 @@ function renderCurvasNG(){
   const pymeVal = ngPyme ? 'SI' : 'NO';
 
   const {series:arsSeries, volumes:arsVol} = cvSeries(cvPool('No Garantizado', CV_ARS, pymeVal), creditos);
-  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol};
-  cvDrawChart(document.getElementById('ng-ars'), arsSeries, arsVol, {});
+  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol, tickStep:1};
+  cvDrawChart(document.getElementById('ng-ars'), arsSeries, arsVol, {tickStep:1});
   cvAttachHover('ng-ars');
   cvRenderLegend('ng-ars-legend', arsSeries.map(s=>({name:s.name, color:s.color})));
 
-  const {series:usdSeries, volumes:usdVol} = cvSeries(cvPool('No Garantizado', CV_USD, pymeVal), [{name:'Agregado', resps:null}]);
+  const {series:usdSeries, volumes:usdVol} = cvSeries(cvPool('No Garantizado', CV_USD, pymeVal), [{name:'Promedio operado', resps:null}]);
   cvChartState['ng-usd'] = {series:usdSeries, volumes:usdVol};
   cvDrawChart(document.getElementById('ng-usd'), usdSeries, usdVol, {});
   cvAttachHover('ng-usd');
 
-  const {series:dolSeries, volumes:dolVol} = cvSeries(cvPool('No Garantizado', CV_DOL, pymeVal), [{name:'Agregado', resps:null}]);
+  const {series:dolSeries, volumes:dolVol} = cvSeries(cvPool('No Garantizado', CV_DOL, pymeVal), [{name:'Promedio operado', resps:null}]);
   cvChartState['ng-dol'] = {series:dolSeries, volumes:dolVol};
   cvDrawChart(document.getElementById('ng-dol'), dolSeries, dolVol, {});
   cvAttachHover('ng-dol');
@@ -1055,14 +1072,14 @@ function setNGPyme(v){
 }
 
 function renderCurvasGAR(){
-  const {series:npSeries, volumes:npVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'NO'), [{name:'Agregado', resps:null}]);
-  cvChartState['gar-nopyme'] = {series:npSeries, volumes:npVol};
-  cvDrawChart(document.getElementById('gar-nopyme'), npSeries, npVol, {});
+  const {series:npSeries, volumes:npVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'NO'), [{name:'Promedio operado', resps:null}]);
+  cvChartState['gar-nopyme'] = {series:npSeries, volumes:npVol, tickStep:1};
+  cvDrawChart(document.getElementById('gar-nopyme'), npSeries, npVol, {tickStep:1});
   cvAttachHover('gar-nopyme');
 
-  const {series:pSeries, volumes:pVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'SI'), [{name:'Agregado', resps:null}]);
-  cvChartState['gar-pyme'] = {series:pSeries, volumes:pVol};
-  cvDrawChart(document.getElementById('gar-pyme'), pSeries, pVol, {});
+  const {series:pSeries, volumes:pVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'SI'), [{name:'Promedio operado', resps:null}]);
+  cvChartState['gar-pyme'] = {series:pSeries, volumes:pVol, tickStep:1};
+  cvDrawChart(document.getElementById('gar-pyme'), pSeries, pVol, {tickStep:1});
   cvAttachHover('gar-pyme');
 }
 
@@ -1071,8 +1088,9 @@ function renderCurvasAV(){
   const monedaMap = {ars:CV_ARS, usd:CV_USD, dol:CV_DOL};
   ['ars','usd','dol'].forEach(mk=>{
     const {series, volumes} = cvSeries(cvPool('Avalado', monedaMap[mk], null), AV_SGR);
-    cvChartState['av-'+mk] = {series, volumes};
-    cvDrawChart(document.getElementById('av-'+mk), series, volumes, {});
+    const tickStep = mk==='ars' ? 1 : undefined;
+    cvChartState['av-'+mk] = {series, volumes, tickStep};
+    cvDrawChart(document.getElementById('av-'+mk), series, volumes, {tickStep});
   });
   avIds.forEach(id=>cvAttachHover(id, avIds));
   cvRenderLegend('av-legend', AV_SGR.map((g,ii)=>({name:g.name, color: CREDIT_PALETTE[ii % CREDIT_PALETTE.length]})));
