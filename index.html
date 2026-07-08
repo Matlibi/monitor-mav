@@ -832,9 +832,21 @@ function cvSeries(pool, groups){
 }
 
 // Geometría compartida entre el dibujo y la detección de hover (mismo espacio: px CSS)
+// canvas.height (bitmap) refleja el mismo atributo HTML "height" que usamos como alto
+// nominal del gráfico — si lo volviéramos a leer con getAttribute() después de haberlo
+// escrito nosotros mismos (para el bitmap en alta densidad), cada redibujo por hover
+// multiplicaría el alto por el devicePixelRatio otra vez, y otra vez: en una pantalla
+// Retina (dpr=2) el gráfico se duplica de tamaño en cada punto sobre el que pasás el
+// mouse. Por eso el alto nominal se guarda una sola vez en un data-attribute propio,
+// que el redibujado nunca toca.
+function cvNominalHeight(canvas){
+  let h = +canvas.dataset.cvH;
+  if(!h){ h = +canvas.getAttribute('height'); canvas.dataset.cvH = h; }
+  return h;
+}
 function cvComputeGeom(canvas, series, volumes){
   const cssW = canvas.clientWidth || canvas.parentElement.clientWidth;
-  const cssH = +canvas.getAttribute('height');
+  const cssH = cvNominalHeight(canvas);
   const padL = 34, padR = 18, padT = 18, padB = 20;
   const insetX = 14;
   const plotW = cssW-padL-padR, plotH = cssH-padT-padB;
