@@ -763,12 +763,6 @@ function agNombre(num){
   return nombre ? `${s} · ${nombre}` : s;
 }
 
-function fmtM(n){
-  if(!n&&n!==0)return'—';
-  if(n>=1e9) return '$'+(n/1e9).toFixed(n>=10e9?1:2)+'bn';
-  if(n>=1e6) return '$'+(n/1e6).toFixed(n>=100e6?0:1)+'mm';
-  return'$'+n.toLocaleString('es-AR',{maximumFractionDigits:0});
-}
 function fmtFull(n){
   if(!n&&n!==0)return'—';
   return'$ '+n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1472,9 +1466,12 @@ function monedaGroup(m){
   if(m==='U$D'||m==='U$S') return 'USD';
   return null;
 }
-function fmtVolFull(n, unit){
+function fmtM(n, unit){
   if(!n && n!==0) return '—';
-  return (unit||'$')+' '+Math.round(n).toLocaleString('es-AR');
+  const u = unit||'$', prefix = u==='$' ? '$' : u+' ';
+  if(n>=1e9) return prefix+Math.round(n/1e9).toLocaleString('es-AR')+' bn';
+  if(n>=1e6) return prefix+Math.round(n/1e6).toLocaleString('es-AR')+' mm';
+  return prefix+Math.round(n).toLocaleString('es-AR');
 }
 function renderKPIs(data){
   // "Volumen operado" muestra ARS por defecto; si el filtro de moneda selecciona
@@ -1496,7 +1493,7 @@ function renderKPIs(data){
     }
   }
   const tasaProm=wavgTasa(data);
-  document.getElementById('kVol').textContent=fmtVolFull(volSel, unitVol);
+  document.getElementById('kVol').textContent=fmtM(volSel, unitVol);
   document.getElementById('kVolLbl').textContent='Volumen operado ('+grupoVol+')';
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kTasa').textContent=tasaProm!=null?tasaProm.toFixed(1)+'%':'—';
