@@ -247,8 +247,17 @@ tbody td{padding:6px 10px;white-space:nowrap}
 .legend-row{display:flex;gap:10px 14px;flex-wrap:wrap;padding:12px 2px 2px;border-top:1px solid var(--border);
   margin-top:4px;max-width:100%}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--t2);
-  max-width:100%;overflow-wrap:anywhere;white-space:normal}
+  max-width:100%;overflow-wrap:anywhere;white-space:normal;
+  border:none;background:transparent;font-family:inherit;cursor:pointer;padding:3px 5px;
+  border-radius:6px;transition:opacity .15s,background-color .15s}
+.legend-item:hover{background:var(--bg)}
+.legend-item.lg-dim{opacity:.4}
 .legend-item .sw{width:9px;height:9px;border-radius:50%}
+.legend-item .lg-box{width:11px;height:11px;border-radius:3px;border:1.5px solid #C7D0E0;
+  flex:none;display:inline-flex;align-items:center;justify-content:center;background:#fff}
+.legend-item .lg-box svg{display:none}
+.legend-item.lg-checked .lg-box{background:var(--navy-mid);border-color:var(--navy-mid)}
+.legend-item.lg-checked .lg-box svg{display:block}
 .click-hint{font-size:10.5px;color:var(--t3);font-style:italic;margin:8px 2px 0}
 .pt-tip{position:fixed;z-index:1000;display:none;pointer-events:none;
   background:var(--navy);color:#fff;border-radius:9px;padding:10px 13px;
@@ -339,7 +348,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
       </div>
     </div>
     <div class="legend-row" id="ng-ars-legend"></div>
-    <p class="click-hint">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle y resaltar ese crédito.</p>
+    <p class="click-hint">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
   </div>
 
   <!-- GARANTIZADO -->
@@ -383,7 +392,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
       </div>
     </div>
     <div class="legend-row" id="av-legend"></div>
-    <p class="click-hint">Pasá el mouse (o tocá) un punto de cualquiera de los 3 gráficos para ver el detalle y resaltar esa SGR en las tres monedas.</p>
+    <p class="click-hint">Pasá el mouse (o tocá) un punto de cualquiera de los 3 gráficos para ver el detalle. Tocá una SGR de la leyenda para aislarla en las tres monedas (podés marcar más de una).</p>
   </div>
 </div>
 
@@ -978,10 +987,31 @@ function cvShowTip(clientX, clientY, name, plazo, tasa, volumen){
 }
 function cvHideTip(){ if(cvTipEl) cvTipEl.style.display='none'; }
 
-function cvRenderLegend(elId, entries){
+// entries: [{name,color}]. selected: Set de nombres marcados (vacío = se muestran todos).
+// onToggle: nombre de una función global que recibe el nombre del crédito/SGR clickeado.
+function cvRenderLegend(elId, entries, selected, onToggle){
   const el = document.getElementById(elId);
   if(!el) return;
-  el.innerHTML = entries.map(e=>`<span class="legend-item"><span class="sw" style="background:${e.color}"></span>${e.name}</span>`).join('');
+  const checkSvg = '<svg width="7" height="6" viewBox="0 0 7 6" fill="none"><path d="M1 3.2l1.7 1.7L6 1" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  el.innerHTML = entries.map(e=>{
+    const checked = selected && selected.has(e.name);
+    const dim = selected && selected.size>0 && !checked;
+    return `<button type="button" class="legend-item${checked?' lg-checked':''}${dim?' lg-dim':''}" onclick="${onToggle}('${e.name.replace(/'/g,"\\'")}')">
+      <span class="lg-box">${checkSvg}</span>
+      <span class="sw" style="background:${e.color}"></span>
+      <span>${e.name}</span>
+    </button>`;
+  }).join('');
+}
+
+// Filtra series/volumes de un chartState según el Set de selección (checkbox de leyenda).
+// Set vacío o ausente = se muestran todas las series, sin filtrar.
+function cvFilteredSeries(state){
+  const sel = state.selected;
+  if(!sel || sel.size===0) return {series: state.series, volumes: state.volumes};
+  const series=[], volumes=[];
+  state.series.forEach((s,i)=>{ if(sel.has(s.name)){ series.push(s); volumes.push(state.volumes[i]); } });
+  return {series, volumes};
 }
 
 // group: ids de los canvases que comparten resaltado (Avalado sincroniza sus 3 monedas)
@@ -1005,20 +1035,23 @@ function cvAttachHover(canvasId, group){
     current = highlightIndex;
     ids.forEach(id=>{
       const s = cvChartState[id];
-      if(s) cvDrawChart(document.getElementById(id), s.series, s.volumes, {highlightIndex, tickStep:s.tickStep});
+      if(!s) return;
+      const {series:vs, volumes:vv} = cvFilteredSeries(s);
+      cvDrawChart(document.getElementById(id), vs, vv, {highlightIndex, tickStep:s.tickStep});
     });
   };
   const handleMove = (clientX, clientY)=>{
     const st = cvChartState[canvasId];
     if(!st) return;
+    const {series:vs, volumes:vv} = cvFilteredSeries(st);
     const rect = canvas.getBoundingClientRect();
     const mx = clientX-rect.left, my = clientY-rect.top;
-    const geo = cvComputeGeom(canvas, st.series, st.volumes);
+    const geo = cvComputeGeom(canvas, vs, vv);
     let hitSi=null, hitI=null, hitDist=Infinity;
-    st.series.forEach((s,si)=>{
+    vs.forEach((s,si)=>{
       s.values.forEach((v,i)=>{
         if(v==null) return;
-        const vol = st.volumes[si][i];
+        const vol = vv[si][i];
         if(!vol) return;
         const x = geo.xAt(i)+geo.jitter(si), y = geo.yAt(v);
         const r = geo.rFor(vol);
@@ -1028,7 +1061,7 @@ function cvAttachHover(canvasId, group){
     });
     if(hitSi!=null){
       paint(hitSi);
-      cvShowTip(clientX, clientY, st.series[hitSi].name, PLAZOS[hitI], st.series[hitSi].values[hitI], st.volumes[hitSi][hitI]);
+      cvShowTip(clientX, clientY, vs[hitSi].name, PLAZOS[hitI], vs[hitSi].values[hitI], vv[hitSi][hitI]);
     } else {
       paint(null);
       cvHideTip();
@@ -1044,15 +1077,25 @@ function cvAttachHover(canvasId, group){
 }
 
 let ngPyme = false;
+// Selección de créditos vía checkbox de leyenda — vacío = se muestran todos
+const ngSelected = new Set();
+function toggleNGCredit(name){
+  ngSelected.has(name) ? ngSelected.delete(name) : ngSelected.add(name);
+  renderCurvasNG();
+}
 function renderCurvasNG(){
   const creditos = ngCreditosFor(ngPyme);
   const pymeVal = ngPyme ? 'SI' : 'NO';
+  // si el toggle PyME saca un crédito que estaba seleccionado (p.ej. Payway), limpiarlo
+  const nombresValidos = new Set(creditos.map(c=>c.name));
+  [...ngSelected].forEach(n=>{ if(!nombresValidos.has(n)) ngSelected.delete(n); });
 
   const {series:arsSeries, volumes:arsVol} = cvSeries(cvPool('No Garantizado', CV_ARS, pymeVal), creditos);
-  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol, tickStep:1};
-  cvDrawChart(document.getElementById('ng-ars'), arsSeries, arsVol, {tickStep:1});
+  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol, tickStep:1, selected:ngSelected};
+  const {series:arsVis, volumes:arsVisVol} = cvFilteredSeries(cvChartState['ng-ars']);
+  cvDrawChart(document.getElementById('ng-ars'), arsVis, arsVisVol, {tickStep:1});
   cvAttachHover('ng-ars');
-  cvRenderLegend('ng-ars-legend', arsSeries.map(s=>({name:s.name, color:s.color})));
+  cvRenderLegend('ng-ars-legend', arsSeries.map(s=>({name:s.name, color:s.color})), ngSelected, 'toggleNGCredit');
 
   const {series:usdSeries, volumes:usdVol} = cvSeries(cvPool('No Garantizado', CV_USD, pymeVal), [{name:'Promedio operado', resps:null}]);
   cvChartState['ng-usd'] = {series:usdSeries, volumes:usdVol};
@@ -1083,17 +1126,24 @@ function renderCurvasGAR(){
   cvAttachHover('gar-pyme');
 }
 
+// Selección de SGR vía checkbox de leyenda, compartida por las 3 monedas de Avalado
+const avSelected = new Set();
+function toggleAVCredit(name){
+  avSelected.has(name) ? avSelected.delete(name) : avSelected.add(name);
+  renderCurvasAV();
+}
 function renderCurvasAV(){
   const avIds = ['av-ars','av-usd','av-dol'];
   const monedaMap = {ars:CV_ARS, usd:CV_USD, dol:CV_DOL};
   ['ars','usd','dol'].forEach(mk=>{
     const {series, volumes} = cvSeries(cvPool('Avalado', monedaMap[mk], null), AV_SGR);
     const tickStep = mk==='ars' ? 1 : undefined;
-    cvChartState['av-'+mk] = {series, volumes, tickStep};
-    cvDrawChart(document.getElementById('av-'+mk), series, volumes, {tickStep});
+    cvChartState['av-'+mk] = {series, volumes, tickStep, selected:avSelected};
+    const {series:vs, volumes:vv} = cvFilteredSeries(cvChartState['av-'+mk]);
+    cvDrawChart(document.getElementById('av-'+mk), vs, vv, {tickStep});
   });
   avIds.forEach(id=>cvAttachHover(id, avIds));
-  cvRenderLegend('av-legend', AV_SGR.map((g,ii)=>({name:g.name, color: CREDIT_PALETTE[ii % CREDIT_PALETTE.length]})));
+  cvRenderLegend('av-legend', AV_SGR.map((g,ii)=>({name:g.name, color: g.color || CREDIT_PALETTE[ii % CREDIT_PALETTE.length]})), avSelected, 'toggleAVCredit');
 }
 
 function renderCurvas(){
