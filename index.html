@@ -1485,11 +1485,15 @@ function renderKPIs(data){
   const grupoVol = gruposFiltro.length===1 ? gruposFiltro[0] : 'ARS';
   const unitVol = grupoVol==='ARS' ? '$' : grupoVol;
 
-  let volSel=0,plazoSum=0,plazoCnt=0,pymeCnt=0;
+  let volSel=0,plazoSum=0,plazoCnt=0,pymeCnt=0,pymeVolSI=0,volTotal=0;
   for(const r of data){
     if(monedaGroup(r.moneda)===grupoVol) volSel+=r.monto||0;
     if(r.plazo!=null){plazoSum+=r.plazo;plazoCnt++;}
     if(r.pyme==='SI') pymeCnt++;
+    if(r.monto!=null && r.monto>0){
+      volTotal+=r.monto;
+      if(r.pyme==='SI') pymeVolSI+=r.monto;
+    }
   }
   const tasaProm=wavgTasa(data);
   document.getElementById('kVol').textContent=fmtVolFull(volSel, unitVol);
@@ -1497,7 +1501,13 @@ function renderKPIs(data){
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kTasa').textContent=tasaProm!=null?tasaProm.toFixed(1)+'%':'—';
   document.getElementById('kPlazo').textContent=plazoCnt?Math.round(plazoSum/plazoCnt)+'d':'—';
-  document.getElementById('kPyme').textContent=data.length?Math.round(pymeCnt/data.length*100)+'%':'—';
+  // Sin filtro PyME/No PyME activo, "Participación PyME" pondera por volumen operado
+  // en vez de por cantidad de operaciones (con el filtro activo da 100%/0% de cualquier
+  // forma, porque data ya viene restringida a un solo valor de pyme).
+  const pymePct = S.pyme===null
+    ? (volTotal>0 ? Math.round(pymeVolSI/volTotal*100) : null)
+    : (data.length ? Math.round(pymeCnt/data.length*100) : null);
+  document.getElementById('kPyme').textContent=pymePct!=null?pymePct+'%':'—';
 }
 
 const TABLE_PAGE=300;
