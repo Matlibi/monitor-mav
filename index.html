@@ -968,13 +968,17 @@ function cvEnsureTip(){
   document.body.appendChild(cvTipEl);
   return cvTipEl;
 }
+function cvFmtVol(n){
+  if(!n && n!==0) return '—';
+  return '$ '+Math.round(n).toLocaleString('es-AR');
+}
 function cvShowTip(clientX, clientY, name, plazo, tasa, volumen){
   const tip = cvEnsureTip();
   tip.innerHTML = `
     <div class="pt-tip-name">${name}</div>
     <div class="pt-tip-row"><span>Plazo</span><b>${plazo} días</b></div>
     <div class="pt-tip-row"><span>Tasa TNA</span><b>${tasa.toFixed(2)}%</b></div>
-    <div class="pt-tip-row"><span>Volumen operado</span><b>${fmtM(volumen)}</b></div>`;
+    <div class="pt-tip-row"><span>Volumen operado</span><b>${cvFmtVol(volumen)}</b></div>`;
   tip.style.display = 'block';
   const vw = window.innerWidth, vh = window.innerHeight;
   const tw = tip.offsetWidth, th = tip.offsetHeight;
