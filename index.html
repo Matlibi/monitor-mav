@@ -341,7 +341,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <div class="mo-label"><span class="mo-swatch" style="background:var(--c-ng)"></span><span class="mo-name">Pesos · ARS · $</span></div>
         <canvas id="ng-ars" height="150"></canvas>
         <div class="legend-row legend-row-tight" id="ng-ars-legend"></div>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de lo operado en ese plazo, por crédito (Tarjeta Naranja, Telecom/Telefónica, Payway, Cencosud, INC S.A.).</p>
       </div>
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólares · U$D / U$S</span></div>
@@ -380,17 +379,14 @@ tbody td{padding:6px 10px;white-space:nowrap}
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--c-ng)"></span><span class="mo-name">Pesos · ARS · $</span></div>
         <canvas id="av-ars" height="150"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de lo operado en ese plazo, por SGR.</p>
       </div>
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólares · U$D / U$S</span></div>
         <canvas id="av-usd" height="150"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de lo operado en ese plazo, por SGR.</p>
       </div>
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar Linked · DOL</span></div>
         <canvas id="av-dol" height="150"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de lo operado en ese plazo, por SGR.</p>
       </div>
     </div>
     <div class="legend-row" id="av-legend"></div>
@@ -958,8 +954,9 @@ function cvDrawChart(canvas, series, volumes, opts){
   // Ticks en valores redondos (no fracciones arbitrarias de vMin/vMax): antes la línea se
   // dibujaba en un valor real como 22.5% pero la etiqueta lo redondeaba a "22%" para mostrarlo,
   // así que un punto en 22.3% quedaba visualmente por debajo de la línea rotulada "22%" aunque
-  // numéricamente estuviera por encima. En ARS el paso queda fijo en 1 punto porcentual.
-  const step = opts.tickStep || cvNiceStep(geo.vMax-geo.vMin, 6);
+  // numéricamente estuviera por encima. El paso se elige apuntando a ~10 líneas, así los rangos
+  // típicos (10-20 puntos porcentuales) quedan en pasos de 2, sin amontonarse en rangos anchos.
+  const step = opts.tickStep || cvNiceStep(geo.vMax-geo.vMin, 10);
   const decimals = step<1 ? 1 : 0;
   const firstTick = Math.ceil(geo.vMin/step)*step;
   for(let v=firstTick; v<=geo.vMax+1e-9; v+=step){
