@@ -346,12 +346,10 @@ tbody td{padding:6px 10px;white-space:nowrap}
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólares · U$D / U$S</span></div>
         <canvas id="ng-usd" height="150"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de todo lo operado en ese plazo (agregado, sin desglose por crédito).</p>
       </div>
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar Linked · DOL</span></div>
         <canvas id="ng-dol" height="150"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de todo lo operado en ese plazo (agregado, sin desglose por crédito).</p>
       </div>
     </div>
     <p class="click-hint">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
@@ -367,12 +365,10 @@ tbody td{padding:6px 10px;white-space:nowrap}
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--c-gar)"></span><span class="mo-name">ARS · PyME</span></div>
         <canvas id="gar-pyme" height="160"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de todo lo operado en ese plazo (agregado, sin desglose por crédito).</p>
       </div>
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--c-gar)"></span><span class="mo-name">ARS · No PyME</span></div>
         <canvas id="gar-nopyme" height="160"></canvas>
-        <p class="pt-note">Cada punto = TNA promedio ponderada de todo lo operado en ese plazo (agregado, sin desglose por crédito).</p>
       </div>
     </div>
   </div>
@@ -1133,9 +1129,9 @@ function renderCurvasNG(){
   [...ngSelected].forEach(n=>{ if(!nombresValidos.has(n)) ngSelected.delete(n); });
 
   const {series:arsSeries, volumes:arsVol} = cvSeries(cvPool('No Garantizado', CV_ARS, pymeVal), creditos);
-  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol, tickStep:1, selected:ngSelected};
+  cvChartState['ng-ars'] = {series:arsSeries, volumes:arsVol, selected:ngSelected};
   const {series:arsVis, volumes:arsVisVol} = cvFilteredSeries(cvChartState['ng-ars']);
-  cvDrawChart(document.getElementById('ng-ars'), arsVis, arsVisVol, {tickStep:1});
+  cvDrawChart(document.getElementById('ng-ars'), arsVis, arsVisVol, {});
   cvAttachHover('ng-ars');
   cvRenderLegend('ng-ars-legend', arsSeries.map(s=>({name:s.name, color:s.color})), ngSelected, 'toggleNGCredit');
 
@@ -1158,13 +1154,13 @@ function setNGPyme(v){
 
 function renderCurvasGAR(){
   const {series:npSeries, volumes:npVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'NO'), [{name:'Promedio operado', resps:null}]);
-  cvChartState['gar-nopyme'] = {series:npSeries, volumes:npVol, tickStep:1};
-  cvDrawChart(document.getElementById('gar-nopyme'), npSeries, npVol, {tickStep:1});
+  cvChartState['gar-nopyme'] = {series:npSeries, volumes:npVol};
+  cvDrawChart(document.getElementById('gar-nopyme'), npSeries, npVol, {});
   cvAttachHover('gar-nopyme');
 
   const {series:pSeries, volumes:pVol} = cvSeries(cvPool('Garantizado', CV_ARS, 'SI'), [{name:'Promedio operado', resps:null}]);
-  cvChartState['gar-pyme'] = {series:pSeries, volumes:pVol, tickStep:1};
-  cvDrawChart(document.getElementById('gar-pyme'), pSeries, pVol, {tickStep:1});
+  cvChartState['gar-pyme'] = {series:pSeries, volumes:pVol};
+  cvDrawChart(document.getElementById('gar-pyme'), pSeries, pVol, {});
   cvAttachHover('gar-pyme');
 }
 
@@ -1179,10 +1175,9 @@ function renderCurvasAV(){
   const monedaMap = {ars:CV_ARS, usd:CV_USD, dol:CV_DOL};
   ['ars','usd','dol'].forEach(mk=>{
     const {series, volumes} = cvSeries(cvPool('Avalado', monedaMap[mk], null), AV_SGR);
-    const tickStep = mk==='ars' ? 1 : undefined;
-    cvChartState['av-'+mk] = {series, volumes, tickStep, selected:avSelected};
+    cvChartState['av-'+mk] = {series, volumes, selected:avSelected};
     const {series:vs, volumes:vv} = cvFilteredSeries(cvChartState['av-'+mk]);
-    cvDrawChart(document.getElementById('av-'+mk), vs, vv, {tickStep});
+    cvDrawChart(document.getElementById('av-'+mk), vs, vv, {});
   });
   avIds.forEach(id=>cvAttachHover(id, avIds));
   cvRenderLegend('av-legend', AV_SGR.map((g,ii)=>({name:g.name, color: g.color || CREDIT_PALETTE[ii % CREDIT_PALETTE.length]})), avSelected, 'toggleAVCredit');
