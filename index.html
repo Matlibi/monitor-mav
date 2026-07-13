@@ -968,17 +968,21 @@ function cvEnsureTip(){
   document.body.appendChild(cvTipEl);
   return cvTipEl;
 }
-function cvFmtVol(n){
-  if(!n && n!==0) return '—';
-  return '$ '+Math.round(n).toLocaleString('es-AR');
+// U$D/U$S y DOL muestran "USD" en vez del símbolo "$" (que queda solo para ARS)
+function cvUnitFor(canvasId){
+  return (canvasId.endsWith('-usd') || canvasId.endsWith('-dol')) ? 'USD' : '$';
 }
-function cvShowTip(clientX, clientY, name, plazo, tasa, volumen){
+function cvFmtVol(n, unit){
+  if(!n && n!==0) return '—';
+  return (unit||'$')+' '+Math.round(n).toLocaleString('es-AR');
+}
+function cvShowTip(clientX, clientY, name, plazo, tasa, volumen, unit){
   const tip = cvEnsureTip();
   tip.innerHTML = `
     <div class="pt-tip-name">${name}</div>
     <div class="pt-tip-row"><span>Plazo</span><b>${plazo} días</b></div>
     <div class="pt-tip-row"><span>Tasa TNA</span><b>${tasa.toFixed(2)}%</b></div>
-    <div class="pt-tip-row"><span>Volumen operado</span><b>${cvFmtVol(volumen)}</b></div>`;
+    <div class="pt-tip-row"><span>Volumen operado</span><b>${cvFmtVol(volumen, unit)}</b></div>`;
   tip.style.display = 'block';
   const vw = window.innerWidth, vh = window.innerHeight;
   const tw = tip.offsetWidth, th = tip.offsetHeight;
@@ -1064,7 +1068,7 @@ function cvAttachHover(canvasId, group){
     });
     if(hitSi!=null){
       paint(hitSi);
-      cvShowTip(clientX, clientY, vs[hitSi].name, PLAZOS[hitI], vs[hitSi].values[hitI], vv[hitSi][hitI]);
+      cvShowTip(clientX, clientY, vs[hitSi].name, PLAZOS[hitI], vs[hitSi].values[hitI], vv[hitSi][hitI], cvUnitFor(canvasId));
     } else {
       paint(null);
       cvHideTip();
