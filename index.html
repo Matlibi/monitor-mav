@@ -493,7 +493,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
   <!-- KPIs -->
   <div class="kpi-row">
-    <div class="kcard c1"><div class="kval" id="kVol">$136mm</div><div class="klbl">Volumen operado (ARS)</div></div>
+    <div class="kcard c1"><div class="kval" id="kVol">$136mm</div><div class="klbl" id="kVolLbl">Volumen operado (ARS)</div></div>
     <div class="kcard c2"><div class="kval" id="kOps">4</div><div class="klbl">Operaciones negociadas</div></div>
     <div class="kcard c1"><div class="kval" id="kTasa">24.3%</div><div class="klbl">Tasa TNA promedio</div></div>
     <div class="kcard c2"><div class="kval" id="kPlazo">59d</div><div class="klbl">Plazo promedio (días)</div></div>
@@ -1465,15 +1465,35 @@ function applyFilters(){
   renderTable(data);
 }
 
+// Agrupa los códigos de moneda del CSV en 3 familias — U$D y U$S son la misma moneda
+function monedaGroup(m){
+  if(m==='$') return 'ARS';
+  if(m==='DOL') return 'DOL';
+  if(m==='U$D'||m==='U$S') return 'USD';
+  return null;
+}
+function fmtVolFull(n, unit){
+  if(!n && n!==0) return '—';
+  return (unit||'$')+' '+Math.round(n).toLocaleString('es-AR');
+}
 function renderKPIs(data){
-  let volArs=0,plazoSum=0,plazoCnt=0,pymeCnt=0;
+  // "Volumen operado" muestra ARS por defecto; si el filtro de moneda selecciona
+  // una sola familia (ARS, USD o DOL) pasa a mostrar el total en esa moneda. Si
+  // se mezclan familias distintas en el filtro, no hay una sola moneda que
+  // mostrar, así que se vuelve al default (ARS).
+  const gruposFiltro = [...new Set([...S.monedas].map(monedaGroup).filter(Boolean))];
+  const grupoVol = gruposFiltro.length===1 ? gruposFiltro[0] : 'ARS';
+  const unitVol = grupoVol==='ARS' ? '$' : grupoVol;
+
+  let volSel=0,plazoSum=0,plazoCnt=0,pymeCnt=0;
   for(const r of data){
-    if(r.moneda==='$') volArs+=r.monto||0;
+    if(monedaGroup(r.moneda)===grupoVol) volSel+=r.monto||0;
     if(r.plazo!=null){plazoSum+=r.plazo;plazoCnt++;}
     if(r.pyme==='SI') pymeCnt++;
   }
   const tasaProm=wavgTasa(data);
-  document.getElementById('kVol').textContent=fmtM(volArs);
+  document.getElementById('kVol').textContent=fmtVolFull(volSel, unitVol);
+  document.getElementById('kVolLbl').textContent='Volumen operado ('+grupoVol+')';
   document.getElementById('kOps').textContent=data.length.toLocaleString('es-AR');
   document.getElementById('kTasa').textContent=tasaProm!=null?tasaProm.toFixed(1)+'%':'—';
   document.getElementById('kPlazo').textContent=plazoCnt?Math.round(plazoSum/plazoCnt)+'d':'—';
@@ -1493,6 +1513,9 @@ function renderTable(data){
       const av=a[col]??-Infinity, bv=b[col]??-Infinity;
       return (av-bv)*dir;
     });
+  } else {
+    // por defecto: fecha más nueva primero
+    data=[...data].sort((a,b)=>parseFecha(b.fecha)-parseFecha(a.fecha));
   }
   const rows=_tableShowAll?data:data.slice(0,TABLE_PAGE);
   const mkRow=r=>{
