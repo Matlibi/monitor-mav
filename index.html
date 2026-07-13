@@ -258,6 +258,12 @@ tbody td{padding:6px 10px;white-space:nowrap}
 .legend-item .lg-box svg{display:none}
 .legend-item.lg-checked .lg-box{background:var(--navy-mid);border-color:var(--navy-mid)}
 .legend-item.lg-checked .lg-box svg{display:block}
+/* leyenda compacta: metida debajo del propio gráfico (una sola columna angosta),
+   en vez de una fila suelta que se extendía por debajo de las tres monedas */
+.legend-row-tight{gap:2px 6px;padding:6px 0 0;border-top:none;margin-top:2px}
+.legend-row-tight .legend-item{font-size:9px;gap:4px;padding:1px 3px}
+.legend-row-tight .lg-box{width:9px;height:9px}
+.legend-row-tight .sw{width:7px;height:7px}
 .click-hint{font-size:10.5px;color:var(--t3);font-style:italic;margin:8px 2px 0}
 .pt-tip{position:fixed;z-index:1000;display:none;pointer-events:none;
   background:var(--navy);color:#fff;border-radius:9px;padding:10px 13px;
@@ -334,6 +340,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
       <div class="cur-card">
         <div class="mo-label"><span class="mo-swatch" style="background:var(--c-ng)"></span><span class="mo-name">Pesos · ARS · $</span></div>
         <canvas id="ng-ars" height="150"></canvas>
+        <div class="legend-row legend-row-tight" id="ng-ars-legend"></div>
         <p class="pt-note">Cada punto = TNA promedio ponderada de lo operado en ese plazo, por crédito (Tarjeta Naranja, Telecom/Telefónica, Payway, Cencosud, INC S.A.).</p>
       </div>
       <div class="cur-card">
@@ -347,7 +354,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <p class="pt-note">Cada punto = TNA promedio ponderada de todo lo operado en ese plazo (agregado, sin desglose por crédito).</p>
       </div>
     </div>
-    <div class="legend-row" id="ng-ars-legend"></div>
     <p class="click-hint">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
   </div>
 
