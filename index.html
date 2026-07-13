@@ -343,11 +343,11 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <div class="legend-row legend-row-tight" id="ng-ars-legend"></div>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólares · U$D / U$S</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D / U$S</span></div>
         <canvas id="ng-usd" height="150"></canvas>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar Linked · DOL</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar · DOL</span></div>
         <canvas id="ng-dol" height="150"></canvas>
       </div>
     </div>
@@ -381,11 +381,11 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <canvas id="av-ars" height="150"></canvas>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólares · U$D / U$S</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D / U$S</span></div>
         <canvas id="av-usd" height="150"></canvas>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar Linked · DOL</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:#5B3E96"></span><span class="mo-name">Dólar · DOL</span></div>
         <canvas id="av-dol" height="150"></canvas>
       </div>
     </div>
@@ -653,7 +653,9 @@ function _evoPlazoInput(changed){
   document.getElementById('evoPlazoLabel').textContent=`${lo} – ${hi}d`;
   renderEvolucion(getFiltered());
 }
-let DB = [...RAW];
+// Avalado no completa la columna PYME en el CSV (y por eso el snapshot embebido en RAW
+// quedó con pyme:'NO' ahí), pero todo lo que opera en ese segmento es PyME.
+let DB = RAW.map(r => r.segmento==='Avalado' ? {...r, pyme:'SI'} : r);
 const CHARTS = {};
 function _debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 function _updateEvoVolChart(data){
@@ -729,10 +731,12 @@ async function cargarDesdeGitHub() {
         const agComp = f[13] ? String(Math.round(parseFloat(f[13]))) : '—';
         const agVend = f[16] ? f[16].trim() : '—';
         const seg = SEG_MAP[f[2]] || f[2] || '—';
+        // Avalado no completa la columna PYME en el CSV, pero todo lo que opera
+        // en ese segmento es PyME — si no, "Participación PyME" da 0% al filtrar Avalado.
         nuevos.push({
           fecha: f[1] ? f[1].trim() : '—',
           segmento: seg,
-          pyme: (f[3] || '').trim().toUpperCase() === 'SI' ? 'SI' : 'NO',
+          pyme: seg==='Avalado' ? 'SI' : ((f[3] || '').trim().toUpperCase() === 'SI' ? 'SI' : 'NO'),
           instrumento: (f[6] || '').trim(),
           plazo: isNaN(plazo) ? null : plazo,
           ag_comp: agComp,
@@ -1354,10 +1358,12 @@ function loadCSVs(files){
         const agComp=f[13]?String(Math.round(parseFloat(f[13]))):'—';
         const agVend=f[16]?f[16].trim():'—';
         const seg=SEG_MAP[f[2]]||f[2]||'—';
+        // Avalado no completa la columna PYME en el CSV, pero todo lo que opera
+        // en ese segmento es PyME — si no, "Participación PyME" da 0% al filtrar Avalado.
         nuevos.push({
           fecha:f[1]?f[1].trim():'—',
           segmento:seg,
-          pyme:(f[3]||'').trim().toUpperCase()==='SI'?'SI':'NO',
+          pyme: seg==='Avalado' ? 'SI' : ((f[3]||'').trim().toUpperCase()==='SI'?'SI':'NO'),
           instrumento:(f[6]||'').trim(),
           plazo:isNaN(plazo)?null:plazo,
           ag_comp:agComp,
