@@ -950,6 +950,9 @@ function cvWeightedPolyFit(pts, degree){
 // el plazo, no la unión punto a punto de los promedios por bucket. Grado 1
 // (recta) con pocos buckets con datos para no forzar una curva que no tiene
 // sustento; grado 2 en cuanto hay margen para que tenga sentido una curvatura.
+// minX/maxX devuelven el rango de buckets con operaciones reales: la curva
+// no se dibuja fuera de ese tramo, para no extrapolar sobre plazos sin
+// operaciones (lo que la hacía "romperse" hacia los extremos del eje).
 function cvFitSeries(values, vols){
   const pts = [];
   for(let i=0;i<values.length;i++){
@@ -957,7 +960,25 @@ function cvFitSeries(values, vols){
   }
   if(pts.length<3) return null;
   const degree = pts.length<=3 ? 1 : 2;
-  return cvWeightedPolyFit(pts, degree);
+  const xs = pts.map(p=>p.x);
+  return {predict: cvWeightedPolyFit(pts, degree), minX: Math.min(...xs), maxX: Math.max(...xs)};
+}
+
+// Combina varias series (p.ej. una por SGR/crédito) en un único promedio
+// ponderado por volumen por bucket, para poder ajustar una sola curva
+// agregada aunque los puntos se sigan pintando con el color de cada serie.
+function cvAggregateValues(series, volumes){
+  const n = series[0] ? series[0].values.length : 0;
+  const vals = new Array(n).fill(null), vols = new Array(n).fill(0);
+  for(let i=0;i<n;i++){
+    let sw=0, swy=0;
+    series.forEach((s,si)=>{
+      const v = s.values[i], w = volumes[si][i];
+      if(v!=null && w>0){ sw+=w; swy+=w*v; }
+    });
+    if(sw>0){ vals[i]=swy/sw; vols[i]=sw; }
+  }
+  return {vals, vols};
 }
 
 function cvDrawChart(canvas, series, volumes, opts){
@@ -1002,29 +1023,38 @@ function cvDrawChart(canvas, series, volumes, opts){
   let drawnAny=false;
   const order = series.map((_,si)=>si).sort((a,b)=>(a===hi?1:0)-(b===hi?1:0));
 
-  // Curva ajustada por serie (línea punteada), debajo de las burbujas.
-  order.forEach(si=>{
-    const s = series[si];
-    const dim = (hi!=null && si!==hi);
-    const fit = cvFitSeries(s.values, volumes[si]);
+  // Curva ajustada: una línea punteada por serie, o una sola línea agregada
+  // (combinando todas las series, p.ej. Avalado) cuando opts.aggregateLine.
+  // En ambos casos, solo entre el primer y el último bucket con operaciones.
+  const drawFitLine = (fit, color)=>{
     if(!fit) return;
     ctx.setLineDash([1,4]);
     ctx.lineCap = 'round';
     ctx.lineWidth = 2;
-    ctx.strokeStyle = s.color + (dim?'2E':'B0');
+    ctx.strokeStyle = color;
     ctx.beginPath();
     let started = false;
     const fitSteps = 80;
     for(let k=0;k<=fitSteps;k++){
-      const xi = k/fitSteps*(PLAZOS.length-1);
-      const y = fit(xi);
+      const xi = fit.minX + (fit.maxX-fit.minX)*k/fitSteps;
+      const y = fit.predict(xi);
       if(y==null || !isFinite(y)) continue;
       const yClamped = Math.max(geo.vMin-1, Math.min(geo.vMax+1, y));
       const px = geo.xAt(xi), py = geo.yAt(yClamped);
       if(!started){ ctx.moveTo(px,py); started = true; } else ctx.lineTo(px,py);
     }
     if(started) ctx.stroke();
-  });
+  };
+  if(opts.aggregateLine){
+    const {vals, vols} = cvAggregateValues(series, volumes);
+    drawFitLine(cvFitSeries(vals, vols), AGG_COLOR+'C0');
+  } else {
+    order.forEach(si=>{
+      const s = series[si];
+      const dim = (hi!=null && si!==hi);
+      drawFitLine(cvFitSeries(s.values, volumes[si]), s.color + (dim?'2E':'B0'));
+    });
+  }
   ctx.setLineDash([]);
 
   order.forEach(si=>{
@@ -1135,7 +1165,7 @@ function cvAttachHover(canvasId, group){
       const s = cvChartState[id];
       if(!s) return;
       const {series:vs, volumes:vv} = cvFilteredSeries(s);
-      cvDrawChart(document.getElementById(id), vs, vv, {highlightIndex, tickStep:s.tickStep});
+      cvDrawChart(document.getElementById(id), vs, vv, {highlightIndex, tickStep:s.tickStep, aggregateLine:s.aggregateLine});
     });
   };
   const handleMove = (clientX, clientY)=>{
@@ -1235,9 +1265,9 @@ function renderCurvasAV(){
   const monedaMap = {ars:CV_ARS, usd:CV_USD, dol:CV_DOL};
   ['ars','usd','dol'].forEach(mk=>{
     const {series, volumes} = cvSeries(cvPool('Avalado', monedaMap[mk], null), AV_SGR);
-    cvChartState['av-'+mk] = {series, volumes, selected:avSelected};
+    cvChartState['av-'+mk] = {series, volumes, selected:avSelected, aggregateLine:true};
     const {series:vs, volumes:vv} = cvFilteredSeries(cvChartState['av-'+mk]);
-    cvDrawChart(document.getElementById('av-'+mk), vs, vv, {});
+    cvDrawChart(document.getElementById('av-'+mk), vs, vv, {aggregateLine:true});
   });
   avIds.forEach(id=>cvAttachHover(id, avIds));
   cvRenderLegend('av-legend', AV_SGR.map((g,ii)=>({name:g.name, color: g.color || CREDIT_PALETTE[ii % CREDIT_PALETTE.length]})), avSelected, 'toggleAVCredit');
