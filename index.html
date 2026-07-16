@@ -325,7 +325,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
 <!-- SCREEN: CURVAS -->
 <div id="screen-curvas">
-  <p class="cv-intro">Dispersión de tasa TNA % (eje Y) por plazo en días (eje X), sobre los <b>últimos 5 días con operaciones</b>. Solo ECHEQ y PAGARÉ. El tamaño de cada punto refleja el volumen operado detrás de ese promedio.</p>
+  <p class="cv-intro">Dispersión de tasa TNA % (eje Y) por plazo en días (eje X), sobre los <b>últimos 5 días con operaciones</b>. Solo ECHEQ y PAGARÉ. El tamaño de cada punto refleja el volumen operado detrás de ese promedio. La línea punteada es una curva ajustada por regresión ponderada por volumen (no une los puntos entre sí): muestra la TNA "esperada" para cada plazo.</p>
 
   <!-- NO GARANTIZADO -->
   <div class="seg-sec" id="sec-ng">
@@ -929,6 +929,73 @@ function cvNiceStep(range, maxTicks){
   return step*mag;
 }
 
+// ── Curva ajustada: regresión polinómica ponderada por volumen ────────────
+// Resuelve el sistema de mínimos cuadrados ponderados (ecuaciones normales)
+// por eliminación gaussiana con pivoteo parcial.
+function cvSolveLinear(A, b){
+  const n = b.length;
+  const M = A.map((row,i)=>[...row, b[i]]);
+  for(let col=0; col<n; col++){
+    let piv = col;
+    for(let r=col+1;r<n;r++) if(Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+    [M[col],M[piv]] = [M[piv],M[col]];
+    const pv = M[col][col] || 1e-12;
+    for(let r=0;r<n;r++){
+      if(r===col) continue;
+      const f = M[r][col]/pv;
+      for(let c=col;c<=n;c++) M[r][c] -= f*M[col][c];
+    }
+  }
+  return M.map((row,i)=> row[n] / (row[i] || 1e-12));
+}
+
+// pts: [{x,y,w}]. Ajusta en el índice de bucket (0..PLAZOS.length-1), que ya
+// está espaciado en tramos parejos de 30 días (salvo el último, abierto "+250"),
+// así que sirve como proxy lineal del plazo para el ajuste sin tener que
+// inventarle un valor de días al bucket abierto.
+function cvWeightedPolyFit(pts, degree){
+  const xs = pts.map(p=>p.x), ys = pts.map(p=>p.y), ws = pts.map(p=>p.w);
+  const wsum = ws.reduce((a,b)=>a+b,0);
+  const xbar = ws.reduce((a,w,i)=>a+w*xs[i],0)/wsum;
+  const xstd = Math.sqrt(ws.reduce((a,w,i)=>a+w*(xs[i]-xbar)**2,0)/wsum) || 1;
+  const wmax = Math.max(...ws);
+  const wn = ws.map(w=>w/wmax);
+  const n = degree+1;
+  const A = Array.from({length:n},()=>new Array(n).fill(0));
+  const b = new Array(n).fill(0);
+  const xn = xs.map(x=>(x-xbar)/xstd);
+  for(let i=0;i<xn.length;i++){
+    const w = wn[i], x = xn[i], y = ys[i];
+    const powers = []; let p = 1;
+    for(let k=0;k<=2*degree;k++){ powers.push(p); p*=x; }
+    for(let j=0;j<n;j++){
+      for(let k=0;k<n;k++) A[j][k] += w*powers[j+k];
+      b[j] += w*powers[j]*y;
+    }
+  }
+  const coeffs = cvSolveLinear(A,b);
+  return xRaw=>{
+    const x = (xRaw-xbar)/xstd;
+    let y=0, p=1;
+    for(let k=0;k<n;k++){ y += coeffs[k]*p; p*=x; }
+    return y;
+  };
+}
+
+// Curva "esperada" para una serie: TNA ponderada por volumen ajustada contra
+// el plazo, no la unión punto a punto de los promedios por bucket. Grado 1
+// (recta) con pocos buckets con datos para no forzar una curva que no tiene
+// sustento; grado 2 en cuanto hay margen para que tenga sentido una curvatura.
+function cvFitSeries(values, vols){
+  const pts = [];
+  for(let i=0;i<values.length;i++){
+    if(values[i]!=null && vols[i]>0) pts.push({x:i, y:values[i], w:vols[i]});
+  }
+  if(pts.length<3) return null;
+  const degree = pts.length<=3 ? 1 : 2;
+  return cvWeightedPolyFit(pts, degree);
+}
+
 function cvDrawChart(canvas, series, volumes, opts){
   opts = opts||{};
   const hi = opts.highlightIndex ?? null;
@@ -970,6 +1037,32 @@ function cvDrawChart(canvas, series, volumes, opts){
 
   let drawnAny=false;
   const order = series.map((_,si)=>si).sort((a,b)=>(a===hi?1:0)-(b===hi?1:0));
+
+  // Curva ajustada por serie (línea punteada), debajo de las burbujas.
+  order.forEach(si=>{
+    const s = series[si];
+    const dim = (hi!=null && si!==hi);
+    const fit = cvFitSeries(s.values, volumes[si]);
+    if(!fit) return;
+    ctx.setLineDash([1,4]);
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = s.color + (dim?'2E':'B0');
+    ctx.beginPath();
+    let started = false;
+    const fitSteps = 80;
+    for(let k=0;k<=fitSteps;k++){
+      const xi = k/fitSteps*(PLAZOS.length-1);
+      const y = fit(xi);
+      if(y==null || !isFinite(y)) continue;
+      const yClamped = Math.max(geo.vMin-1, Math.min(geo.vMax+1, y));
+      const px = geo.xAt(xi), py = geo.yAt(yClamped);
+      if(!started){ ctx.moveTo(px,py); started = true; } else ctx.lineTo(px,py);
+    }
+    if(started) ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
   order.forEach(si=>{
     const s = series[si];
     const dim = (hi!=null && si!==hi);
