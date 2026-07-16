@@ -950,7 +950,9 @@ function cvWeightedPolyFit(pts, degree){
 // la unión punto a punto de los promedios por bucket. Grado 1 (recta) salvo
 // que haya al menos 5 buckets con datos: con menos puntos que eso, un grado 2
 // tiene muy poco sustento estadístico y tiende a sobreajustar — dispara una
-// parábola hacia el último punto en vez de una tendencia razonable.
+// parábola hacia el último punto en vez de una tendencia razonable. Con
+// exactamente 2 buckets, la "curva" es la recta entre ambos — sigue siendo
+// útil como referencia aunque no haya margen para nada más que eso.
 // minX/maxX devuelven el rango de buckets con operaciones reales: la curva
 // no se dibuja fuera de ese tramo, para no extrapolar sobre plazos sin
 // operaciones (lo que la hacía "romperse" hacia los extremos del eje).
@@ -959,7 +961,7 @@ function cvFitSeries(values, vols){
   for(let i=0;i<values.length;i++){
     if(values[i]!=null && vols[i]>0) pts.push({x:i, y:values[i], w:vols[i]});
   }
-  if(pts.length<3) return null;
+  if(pts.length<2) return null;
   const degree = pts.length<5 ? 1 : 2;
   const xs = pts.map(p=>p.x);
   return {predict: cvWeightedPolyFit(pts, degree), minX: Math.min(...xs), maxX: Math.max(...xs)};
