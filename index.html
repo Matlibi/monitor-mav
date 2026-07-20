@@ -230,7 +230,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
 .seg-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 .seg-pill{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#fff;
   border-radius:14px;padding:4px 11px}
-.seg-note{font-size:11px;color:var(--t3);font-style:italic}
 .pyme-toggle{display:flex;background:var(--bg);border-radius:16px;padding:3px;gap:2px;margin-left:auto}
 .pyme-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:13px;color:var(--t3);cursor:pointer;
   border:none;background:transparent;font-family:inherit}
@@ -324,8 +323,8 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
 <!-- SCREEN: CURVAS -->
 <div id="screen-curvas">
-  <p class="cv-intro">Dispersión de tasa TNA % (eje Y) por plazo en días (eje X), sobre los <b>últimos 5 días con operaciones</b>. Solo ECHEQ y PAGARÉ. El tamaño de cada punto refleja el volumen operado detrás de ese promedio. La línea punteada es una curva ajustada por regresión ponderada por volumen (no une los puntos entre sí): muestra la TNA "esperada" para cada plazo.</p>
-  <p class="cv-intro" style="margin-bottom:16px">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
+  <p class="cv-intro">Dispersión de TNA % (eje Y) por plazo en días (eje X), últimos 5 días operados. Solo ECHEQ y PAGARÉ. El tamaño de los puntos indica volumen operado; la línea punteada es una regresión ponderada por volumen que muestra la TNA esperada por plazo (no une los puntos).</p>
+  <p class="cv-intro" style="margin-bottom:16px">Pasá el mouse (o tocá) un punto del gráfico para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
 
   <!-- NO GARANTIZADO -->
   <div class="seg-sec" id="sec-ng">
@@ -343,7 +342,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <div class="legend-row legend-row-tight" id="ng-ars-legend"></div>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D / U$S</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D (BCRA) / U$S (BNA)</span></div>
         <canvas id="ng-usd" height="150"></canvas>
       </div>
       <div class="cur-card">
@@ -357,7 +356,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
   <div class="seg-sec" id="sec-gar">
     <div class="seg-hdr">
       <span class="seg-pill" style="background:var(--c-gar)">Garantizado</span>
-      <span class="seg-note">único mercado: ARS — agregado por plazo, sin desglose por crédito</span>
     </div>
     <div class="cur-row n2">
       <div class="cur-card">
@@ -380,7 +378,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <canvas id="av-ars" height="150"></canvas>
       </div>
       <div class="cur-card">
-        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D / U$S</span></div>
+        <div class="mo-label"><span class="mo-swatch" style="background:var(--celeste)"></span><span class="mo-name">Dólar Linked · U$D (BCRA) / U$S (BNA)</span></div>
         <canvas id="av-usd" height="150"></canvas>
       </div>
       <div class="cur-card">
@@ -1738,13 +1736,16 @@ function renderEvolucion(data){
 
 // ── MULTISELECT MONEDA ────────────────────────────────────────────────────
 let ALL_MONEDAS=[];
+function monedaLabel(m){
+  return m==='U$D' ? 'U$D (BCRA)' : m==='U$S' ? 'U$S (BNA)' : m;
+}
 function buildMonedaList(){
   ALL_MONEDAS=[...new Set(DB.map(r=>r.moneda))].filter(Boolean).sort();
   const el=document.getElementById('monedaList');
   el.innerHTML=ALL_MONEDAS.map(m=>`
     <label class="ms-item">
       <input type="checkbox" ${S.monedas.has(m)?'checked':''} onchange="toggleMoneda('${m}')">
-      <span>${m}</span>
+      <span>${monedaLabel(m)}</span>
     </label>`).join('');
 }
 function toggleMoneda(val){
@@ -1765,7 +1766,7 @@ function updateMonedaTrigger(){
   const cnt=document.getElementById('monedaCount');
   const trg=document.getElementById('monedaTrigger');
   if(n===0){lbl.textContent='Todas';cnt.classList.add('hidden');trg.classList.remove('has-val');}
-  else{lbl.textContent=n===1?[...S.monedas][0]:'Varias';cnt.textContent=n;cnt.classList.remove('hidden');trg.classList.add('has-val');}
+  else{lbl.textContent=n===1?monedaLabel([...S.monedas][0]):'Varias';cnt.textContent=n;cnt.classList.remove('hidden');trg.classList.add('has-val');}
 }
 function toggleMonedaMs(){
   const dd=document.getElementById('monedaDropdown');
