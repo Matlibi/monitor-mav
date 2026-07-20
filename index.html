@@ -224,7 +224,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
 
 /* CURVAS: dispersión TNA x plazo */
 #screen-curvas{padding:20px 24px 40px}
-.cv-intro{font-size:12.5px;color:var(--t2);margin:0 0 16px;max-width:82ch}
+.cv-intro{font-size:12.5px;color:var(--t2);margin:0 0 10px}
 .seg-sec{background:var(--surface);border:1px solid var(--border);border-radius:10px;
   padding:16px 18px 18px;margin-bottom:16px;box-shadow:var(--sh)}
 .seg-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
@@ -264,7 +264,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
 .legend-row-tight .legend-item{font-size:9px;gap:4px;padding:1px 3px}
 .legend-row-tight .lg-box{width:9px;height:9px}
 .legend-row-tight .sw{width:7px;height:7px}
-.click-hint{font-size:10.5px;color:var(--t3);font-style:italic;margin:8px 2px 0}
 .pt-tip{position:fixed;z-index:1000;display:none;pointer-events:none;
   background:var(--navy);color:#fff;border-radius:9px;padding:10px 13px;
   font-family:'Montserrat',sans-serif;font-size:11.5px;line-height:1.6;
@@ -326,6 +325,7 @@ tbody td{padding:6px 10px;white-space:nowrap}
 <!-- SCREEN: CURVAS -->
 <div id="screen-curvas">
   <p class="cv-intro">Dispersión de tasa TNA % (eje Y) por plazo en días (eje X), sobre los <b>últimos 5 días con operaciones</b>. Solo ECHEQ y PAGARÉ. El tamaño de cada punto refleja el volumen operado detrás de ese promedio. La línea punteada es una curva ajustada por regresión ponderada por volumen (no une los puntos entre sí): muestra la TNA "esperada" para cada plazo.</p>
+  <p class="cv-intro" style="margin-bottom:16px">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
 
   <!-- NO GARANTIZADO -->
   <div class="seg-sec" id="sec-ng">
@@ -351,7 +351,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
         <canvas id="ng-dol" height="150"></canvas>
       </div>
     </div>
-    <p class="click-hint">Pasá el mouse (o tocá) un punto del gráfico ARS para ver el detalle. Tocá un crédito de la leyenda para aislarlo (podés marcar más de uno).</p>
   </div>
 
   <!-- GARANTIZADO -->
@@ -390,7 +389,6 @@ tbody td{padding:6px 10px;white-space:nowrap}
       </div>
     </div>
     <div class="legend-row" id="av-legend"></div>
-    <p class="click-hint">Pasá el mouse (o tocá) un punto de cualquiera de los 3 gráficos para ver el detalle. Tocá una SGR de la leyenda para aislarla en las tres monedas (podés marcar más de una).</p>
   </div>
 </div>
 
@@ -810,7 +808,7 @@ const SEGS=['No Garantizado','Garantizado','Avalado'];
 const getHora=r=>{if(!r.hora||r.hora==='—')return null;const m=r.hora.match(/^(\d{2})/);return m?m[1]+':00':null};
 
 // ── CURVAS: dispersión TNA % × plazo por segmento, últimos 5 días con operaciones ──
-const PLAZOS = ['30','60','90','120','150','180','210','240','+250'];
+const PLAZOS = ['30','60','90','120','150','180','210','240','≥250'];
 function plazoBucketIdx(p){
   if(p==null) return null;
   if(p<=30) return 0; if(p<=60) return 1; if(p<=90) return 2;
@@ -950,7 +948,7 @@ function cvSolveLinear(A, b){
 }
 
 // pts: [{x,y,w}]. Ajusta en el índice de bucket (0..PLAZOS.length-1), que ya
-// está espaciado en tramos parejos de 30 días (salvo el último, abierto "+250"),
+// está espaciado en tramos parejos de 30 días (salvo el último, abierto "≥250"),
 // así que sirve como proxy lineal del plazo para el ajuste sin tener que
 // inventarle un valor de días al bucket abierto.
 function cvWeightedPolyFit(pts, degree){
